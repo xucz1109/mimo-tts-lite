@@ -5,25 +5,22 @@
 ## 功能
 
 - 🎤 **文字转语音** — 输入文本，一键生成 WAV/MP3 音频
-- 🔍 **文本校验** — AI 自动检查错别字、多音字、重复字、语句不通顺
-- ⚙️ **参数调节** — 语速、音量、音高、段落停顿
-- 📜 **历史记录** — 本地保存生成历史，支持回放
-- 📦 **格式选择** — WAV / MP3 输出
+- 🔊 **音色选择** — 默认 / 中文 / 英文
+- 🎨 **语气控制** — 情感（开心、悲伤等）+ 抑扬顿挫（清晰有力、抑扬顿挫等）
+- ⏸️ **智能停顿** — 自动按句断句，可自定义停顿时长
+- 🔍 **文本校验** — AI 检查不通顺 & 多音字
+- ⚙️ **参数调节** — 语速、音量、音高
+- 📜 **历史记录** — 本地保存，支持回放（默认折叠）
 
 ## 快速开始
 
 ```bash
-# 1. 安装依赖
 npm install
-
-# 2. 启动（需要 MiMo API Key）
 MIMO_API_KEY=your_key node server.js
-
-# 3. 打开浏览器
-# http://localhost:3210
+# 打开 http://localhost:3210
 ```
 
-API Key 也可以在页面上直接输入，无需环境变量。
+API Key 也可以在页面上直接输入。
 
 ## 环境变量
 
@@ -41,57 +38,37 @@ API Key 也可以在页面上直接输入，无需环境变量。
 
 生成语音。
 
-```json
-{
-  "text": "你好，这是一段测试文本",
-  "format": "wav",
-  "speed": 1.0,
-  "pitch": 0,
-  "volume": 100,
-  "pauseMs": 0,
-  "apiKey": "optional_inline_key"
-}
-```
-
-**响应：**
-
-```json
-{
-  "success": true,
-  "audio": "<base64-encoded>",
-  "size": 92204,
-  "filename": "tts_xxx.wav",
-  "format": "wav",
-  "mimeType": "audio/wav"
-}
-```
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `text` | string | 待合成文本（必填，≤10000字） |
+| `style` | string | 语气风格，如 `开心 清晰有力` |
+| `voice` | string | 音色：`mimo_default` / `default_zh` / `default_en` |
+| `speed` | number | 语速，0.5-2.0，默认 1.0 |
+| `pitch` | number | 音高，-12 到 12，默认 0 |
+| `volume` | number | 音量，0-200，默认 100 |
+| `pauseMs` | number | 句间停顿(ms)，0-5000 |
+| `format` | string | 输出格式：`wav` / `mp3` |
+| `apiKey` | string | 可选，页面传入的 Key |
 
 ### POST /api/proofread
 
-AI 文本校验。
+AI 文本校验，检查两类问题：
+
+1. **不通顺** — 拗口、搭配不当的字词
+2. **多音字** — 文中出现的所有多音字及读音
 
 ```json
 {
-  "text": "今天天气很好，我们一起去公圆玩把",
-  "apiKey": "optional_inline_key"
+  "text": "银行发行的新政策影响了行风"
 }
 ```
-
-**响应：**
 
 ```json
 {
   "success": true,
-  "issues": [
-    {
-      "type": "错别字",
-      "position": "公圆",
-      "original": "公圆",
-      "suggestion": "公园",
-      "reason": "'圆'应为'园'，指公园，用字错误"
-    }
-  ],
-  "summary": "文本中有1处错别字，修改后语句通顺。"
+  "awkward": [{"position":"...","original":"...","suggestion":"...","reason":"..."}],
+  "polyphonic": [{"character":"行","pinyin":"háng","context":"银行","note":"..."}],
+  "summary": "..."
 }
 ```
 
@@ -99,15 +76,11 @@ AI 文本校验。
 
 健康检查。
 
-```json
-{ "status": "ok", "hasApiKey": true }
-```
-
 ## 技术栈
 
 - **后端：** Node.js + Express
 - **前端：** 原生 HTML/CSS/JS，无框架依赖
-- **API：** MiMo v2 (OpenAI 兼容格式)
+- **API：** MiMo v2（OpenAI 兼容格式）
 - **音频处理：** ffmpeg（MP3 转换）
 
 ## License

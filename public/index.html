@@ -317,12 +317,17 @@
       </div>
 
       <div class="history-section">
-        <div class="card-title"><span class="icon">📜</span> 历史记录 <span style="font-size:0.76rem; color:var(--muted); font-weight:400; margin-left:auto;" id="historyCount">(0)</span></div>
-        <div class="history-list" id="historyList">
-          <div class="history-empty">暂无历史记录</div>
+        <div class="card-title collapsible" onclick="toggleCollapse(this)">
+          <span class="icon">📜</span> 历史记录 <span style="font-size:0.76rem; color:var(--muted); font-weight:400; margin-left:4px;" id="historyCount">(0)</span>
+          <span class="chevron">▼</span>
         </div>
-        <div class="history-clear-btn" id="clearHistoryBtn" style="display:none;">
-          <button class="btn btn-outline btn-sm" onclick="clearHistory()">🗑️ 清空</button>
+        <div class="collapsible-body">
+          <div class="history-list" id="historyList">
+            <div class="history-empty">暂无历史记录</div>
+          </div>
+          <div class="history-clear-btn" id="clearHistoryBtn" style="display:none;">
+            <button class="btn btn-outline btn-sm" onclick="clearHistory()">🗑️ 清空</button>
+          </div>
         </div>
       </div>
     </div>
