@@ -1192,6 +1192,11 @@ with open("output.wav", "wb") as f:
       addHistory({
         text: textInput.value.trim().slice(0, 100),
         style: style || '默认',
+        speed: parseFloat(document.getElementById('speedSlider').value),
+        volume: parseInt(document.getElementById('volumeSlider').value),
+        pitch: parseInt(document.getElementById('pitchSlider').value),
+        pauseMs: parseInt(document.getElementById('pauseSlider').value),
+        format: outputFormat,
         audioBase64: data.audio,
         filename: currentFilename,
         size: data.size,
@@ -1243,17 +1248,27 @@ with open("output.wav", "wb") as f:
     }
 
     clearBtn.style.display = '';
-    list.innerHTML = history.map((h, i) => `
+    list.innerHTML = history.map((h, i) => {
+      // Build param summary
+      const parts = [];
+      if (h.style && h.style !== '默认') parts.push(`🎨${escHtml(h.style)}`);
+      if (h.speed && h.speed !== 1) parts.push(`⚡${h.speed}x`);
+      if (h.volume && h.volume !== 100) parts.push(`🔊${h.volume}%`);
+      if (h.pitch && h.pitch !== 0) parts.push(`🎵${h.pitch > 0 ? '+' : ''}${h.pitch}`);
+      if (h.pauseMs && h.pauseMs > 0) parts.push(`⏸${h.pauseMs}ms`);
+      if (h.format && h.format !== 'wav') parts.push(`📦${h.format.toUpperCase()}`);
+      const params = parts.length ? parts.join(' · ') : '默认参数';
+      return `
       <div class="history-item" onclick="playHistory(${i})">
         <span class="hist-icon">🔊</span>
         <div style="flex:1; overflow:hidden;">
           <div class="hist-text">${escHtml(h.text)}</div>
-          <div class="hist-style">${escHtml(h.style)} · ${h.time}</div>
+          <div class="hist-style">${params} · ${h.time}</div>
         </div>
         <button class="hist-play" title="播放">▶️</button>
         <button class="hist-del" onclick="event.stopPropagation(); deleteHistory(${i})" title="删除">✕</button>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   function playHistory(index) {
@@ -1269,9 +1284,11 @@ with open("output.wav", "wb") as f:
   }
 
   function deleteHistory(index) {
+    if (!confirm('确定删除这条历史记录？')) return;
     history.splice(index, 1);
     localStorage.setItem('tts_history', JSON.stringify(history));
     renderHistory();
+  }
   }
 
   function clearHistory() {
