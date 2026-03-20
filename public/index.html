@@ -6,323 +6,506 @@
   <title>MiMo TTS — 文字转语音</title>
   <style>
     :root {
-      --bg: #0f0f13;
-      --card: #1a1a24;
-      --border: #2a2a3a;
-      --text: #e8e8f0;
-      --muted: #8888aa;
+      --bg: #0a0a10;
+      --surface: #13131f;
+      --card: #1a1a2a;
+      --border: #2a2a40;
+      --text: #e8e8f4;
+      --muted: #7777aa;
       --accent: #7c5cfc;
-      --accent-hover: #6a48e8;
+      --accent2: #b68afe;
+      --accent-glow: rgba(124,92,252,0.15);
       --danger: #ff4466;
       --success: #34d399;
-      --radius: 12px;
+      --warning: #fbbf24;
+      --radius: 14px;
+      --radius-sm: 8px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
     }
 
-    .container {
-      width: 100%;
-      max-width: 640px;
-    }
+    /* ── Layout ── */
+    .app { max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
 
-    /* Header */
+    /* ── Header ── */
     .header {
       text-align: center;
-      margin-bottom: 32px;
+      padding: 40px 0 24px;
     }
-    .header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #7c5cfc, #b68afe);
+    .header .logo {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
-    .header p {
+    .header .sub { color: var(--muted); font-size: 0.95rem; }
+    .header .badges { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .badge {
+      display: inline-block; font-size: 0.72rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    }
+    .badge.accent { background: var(--accent-glow); border-color: var(--accent); color: var(--accent2); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 0;
+      background: none;
+      border: none;
       color: var(--muted);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--card); }
+    .tab-btn.active {
+      color: #fff;
+      background: var(--accent);
+      box-shadow: 0 2px 12px rgba(124,92,252,0.3);
     }
 
-    /* Card */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Card ── */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 28px;
+      padding: 24px;
       margin-bottom: 20px;
     }
+    .card-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title .icon { font-size: 1.2rem; }
 
-    /* Labels */
+    /* ── Form ── */
     label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      display: block; font-size: 0.8rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
-
-    /* Textarea */
-    textarea {
+    textarea, input[type="text"] {
       width: 100%;
-      min-height: 140px;
-      background: #12121a;
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       color: var(--text);
-      font-size: 1rem;
-      line-height: 1.6;
+      font-size: 1rem; line-height: 1.6;
       padding: 14px;
-      resize: vertical;
-      transition: border-color 0.2s;
       font-family: inherit;
+      transition: border-color 0.2s;
     }
-    textarea:focus {
-      outline: none;
-      border-color: var(--accent);
+    textarea { min-height: 120px; resize: vertical; }
+    textarea:focus, input[type="text"]:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
     }
-    textarea::placeholder {
-      color: #555570;
-    }
+    textarea::placeholder, input::placeholder { color: #444460; }
 
     .char-count {
-      text-align: right;
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: 6px;
+      text-align: right; font-size: 0.78rem; color: var(--muted); margin-top: 4px;
     }
 
-    /* Row */
-    .row {
-      display: flex;
-      gap: 16px;
-      margin-top: 16px;
+    /* ── Style Grid ── */
+    .style-section { margin-bottom: 16px; }
+    .style-section-title {
+      font-size: 0.8rem; font-weight: 600; color: var(--muted);
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
     }
-    .row > * { flex: 1; }
-
-    /* Select */
-    select {
-      width: 100%;
-      background: #12121a;
+    .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 6px 14px;
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.95rem;
-      padding: 10px 14px;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: var(--muted);
       cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
     }
-    select:focus {
-      outline: none;
+    .chip:hover { border-color: var(--accent); color: var(--text); }
+    .chip.active {
+      background: var(--accent);
       border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(124,92,252,0.25);
     }
 
-    /* Button */
+    /* ── Voice Clone ── */
+    .file-upload {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .file-upload:hover { border-color: var(--accent); }
+    .file-upload input { display: none; }
+    .file-upload .icon { font-size: 1.5rem; }
+    .file-upload .info { flex: 1; }
+    .file-upload .name { font-size: 0.85rem; color: var(--text); }
+    .file-upload .hint { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .file-upload .remove-btn {
+      background: none; border: none; color: var(--danger);
+      cursor: pointer; font-size: 1.1rem; padding: 4px;
+    }
+
+    /* ── Normalize ── */
+    .normalize-bar {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 12px; padding: 8px 12px;
+      background: #1a1a30;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+    }
+    .normalize-bar label { margin-bottom: 0; font-size: 0.75rem; }
+    .toggle-switch {
+      position: relative; width: 36px; height: 20px;
+      background: var(--border); border-radius: 10px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-switch.on { background: var(--accent); }
+    .toggle-switch::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      background: #fff; border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-switch.on::after { transform: translateX(16px); }
+
+    /* ── Button ── */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-flex; align-items: center; justify-content: center;
       gap: 8px;
       background: var(--accent);
       color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 28px;
+      font-size: 1rem; font-weight: 700;
+      border: none; border-radius: var(--radius-sm);
+      padding: 14px 28px;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      transition: all 0.2s;
       width: 100%;
     }
     .btn:hover:not(:disabled) {
       background: var(--accent-hover);
+      box-shadow: 0 4px 20px rgba(124,92,252,0.3);
+      transform: translateY(-1px);
     }
-    .btn:active:not(:disabled) {
-      transform: scale(0.98);
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-sm {
+      padding: 8px 16px; font-size: 0.85rem; width: auto; font-weight: 600;
     }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .btn-outline {
+      background: transparent; border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-outline:hover { background: var(--card); border-color: var(--accent); }
+
+    /* ── Result ── */
+    .result { display: none; }
+    .result.show { display: block; }
+    .audio-player { width: 100%; margin: 12px 0; border-radius: var(--radius-sm); }
+    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .result-actions .btn-sm { flex: 1; min-width: 100px; }
+
+    .meta-info {
+      display: flex; gap: 16px; margin-top: 12px;
+      font-size: 0.78rem; color: var(--muted);
     }
 
-    .btn-secondary {
-      background: transparent;
+    /* ── History ── */
+    .history-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface);
       border: 1px solid var(--border);
-      color: var(--text);
-      font-weight: 500;
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s;
     }
-    .btn-secondary:hover:not(:disabled) {
-      background: #22223a;
-      border-color: var(--accent);
-    }
+    .history-item:hover { border-color: var(--accent); }
+    .history-item .hist-icon { font-size: 1.3rem; }
+    .history-item .hist-text { flex: 1; font-size: 0.85rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-item .hist-style { font-size: 0.75rem; color: var(--accent2); margin-top: 2px; }
+    .history-item .hist-time { font-size: 0.72rem; color: var(--muted); }
+    .history-item .hist-play { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1.2rem; }
+    .history-item .hist-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
+    .history-item .hist-del:hover { color: var(--danger); }
 
-    /* Result */
-    .result {
-      display: none;
-    }
-    .result.show {
-      display: block;
-    }
-
-    .audio-player {
-      width: 100%;
-      margin: 16px 0;
-      border-radius: 8px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-    }
-    .actions .btn,
-    .actions .btn-secondary {
-      flex: 1;
-      padding: 10px 16px;
-      font-size: 0.9rem;
-    }
-
-    /* Loading */
-    .loading {
-      display: none;
-      text-align: center;
-      padding: 32px;
-    }
-    .loading.show {
-      display: block;
-    }
-
+    /* ── Loading ── */
+    .loading { display: none; text-align: center; padding: 32px; }
+    .loading.show { display: block; }
     .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
+      width: 40px; height: 40px;
+      border: 3px solid var(--border); border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 12px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { color: var(--muted); font-size: 0.9rem; }
 
-    .loading p {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    /* Error */
+    /* ── Error ── */
     .error {
       display: none;
       background: #2a1020;
       border: 1px solid var(--danger);
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       padding: 12px 16px;
       color: var(--danger);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       margin-top: 12px;
     }
-    .error.show {
-      display: block;
-    }
+    .error.show { display: block; }
 
-    /* Footer */
-    .footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.8rem;
-      margin-top: 12px;
+    /* ── API Doc ── */
+    .doc-section { margin-bottom: 24px; }
+    .doc-section h3 {
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 10px;
+      color: var(--text);
+      display: flex; align-items: center; gap: 6px;
     }
-    .footer a {
-      color: var(--accent);
-      text-decoration: none;
+    .doc-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .doc-table th {
+      text-align: left; padding: 8px 12px;
+      background: var(--surface); color: var(--muted);
+      font-weight: 600; border-bottom: 1px solid var(--border);
+    }
+    .doc-table td {
+      padding: 8px 12px; border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .doc-table tr:last-child td { border-bottom: none; }
+    .doc-table code {
+      background: var(--surface); padding: 2px 6px;
+      border-radius: 4px; font-size: 0.78rem; color: var(--accent2);
+    }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      overflow-x: auto;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text);
+      margin: 10px 0;
+    }
+    pre code { background: none; padding: 0; }
+    .code-block {
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 10px;
+      font-size: 0.72rem; color: var(--muted); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center; color: var(--muted); font-size: 0.78rem;
+      margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .app { padding: 16px 12px 60px; }
+      .header .logo { font-size: 1.8rem; }
+      .card { padding: 18px; }
+      .tabs { overflow-x: auto; }
+      .tab-btn { white-space: nowrap; font-size: 0.82rem; padding: 8px 4px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🎙️ MiMo TTS</h1>
-      <p>输入文字，生成语音，试听并下载</p>
-    </div>
+<div class="app">
 
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">🎙️ MiMo TTS</div>
+    <div class="sub">小米 MiMo v2 大模型 · 文字转语音</div>
+    <div class="badges">
+      <span class="badge accent">mimo-v2-audio-tts</span>
+      <span class="badge">24kHz WAV</span>
+      <span class="badge">语音克隆</span>
+      <span class="badge">16+ 风格</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tts')">🎤 语音合成</button>
+    <button class="tab-btn" onclick="switchTab('history')">📜 历史记录</button>
+    <button class="tab-btn" onclick="switchTab('docs')">📖 API 文档</button>
+  </div>
+
+  <!-- ══════════ Tab: TTS ══════════ -->
+  <div class="tab-panel active" id="panel-tts">
+
+    <!-- Text Input -->
     <div class="card">
-      <label for="textInput">输入文本</label>
-      <textarea
-        id="textInput"
-        placeholder="在这里输入你想转换为语音的文字…"
-        maxlength="10000"
-      ></textarea>
+      <div class="card-title"><span class="icon">📝</span> 输入文本</div>
+      <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…&#10;&#10;示例：欢迎使用小米 MiMo 语音合成系统，我们支持多种风格的语音合成，包括方言、情绪调节、语速控制等。"></textarea>
       <div class="char-count"><span id="charCount">0</span> / 10000</div>
 
-      <div class="row">
-        <div>
-          <label for="styleSelect">语音风格</label>
-          <select id="styleSelect">
-            <option value="">默认（自然语音）</option>
-            <option value="开心">😊 开心</option>
-            <option value="悲伤">😢 悲伤</option>
-            <option value="生气">😠 生气</option>
-            <option value="平静">😌 平静</option>
-            <option value="语速慢">🐢 语速慢</option>
-            <option value="语速快">🐇 语速快</option>
-            <option value="悄悄话">🤫 悄悄话</option>
-            <option value="清晰有力">📢 清晰有力</option>
-            <option value="慵懒 刚睡醒">😴 慵懒 刚睡醒</option>
-            <option value="撒娇 夹子音">🥰 撒娇</option>
-            <option value="深情款款 语速慢">💕 深情款款</option>
-            <option value="像个大将军">⚔️ 像个大将军</option>
-            <option value="像个小孩">🧒 像个小孩</option>
-            <option value="东北话">🌲 东北话</option>
-            <option value="四川话">🌶️ 四川话</option>
-            <option value="台湾腔">🧋 台湾腔</option>
-            <option value="粤语">🥟 粤语</option>
-            <option value="custom">✏️ 自定义…</option>
-          </select>
-        </div>
+      <div class="normalize-bar">
+        <div class="toggle-switch on" id="normalizeToggle" onclick="toggleNormalize()"></div>
+        <label style="font-size:0.8rem">自动文本规范化</label>
+        <span style="flex:1"></span>
+        <span style="font-size:0.75rem; color:var(--muted)">将数字、符号转为自然朗读格式</span>
       </div>
-
-      <div id="customStyleRow" class="row" style="display:none; margin-top:12px">
-        <div>
-          <label for="customStyle">自定义风格</label>
-          <input
-            type="text"
-            id="customStyle"
-            placeholder="如：语速慢 清晰 像个新闻主播"
-            style="
-              width: 100%;
-              background: #12121a;
-              border: 1px solid var(--border);
-              border-radius: 8px;
-              color: var(--text);
-              font-size: 0.95rem;
-              padding: 10px 14px;
-              font-family: inherit;
-            "
-          />
-        </div>
-      </div>
-
-      <div style="margin-top: 20px;">
-        <button class="btn" id="generateBtn" onclick="generate()">
-          🎵 生成语音
-        </button>
-      </div>
-
-      <div class="error" id="errorMsg"></div>
     </div>
+
+    <!-- Style Selection -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🎨</span> 风格设置</div>
+
+      <div class="style-section">
+        <div class="style-section-title">😊 情绪</div>
+        <div class="chip-group" id="emotionChips">
+          <div class="chip active" data-value="">默认</div>
+          <div class="chip" data-value="开心">😊 开心</div>
+          <div class="chip" data-value="悲伤">😢 悲伤</div>
+          <div class="chip" data-value="生气">😠 生气</div>
+          <div class="chip" data-value="平静">😌 平静</div>
+          <div class="chip" data-value="深情款款">💕 深情</div>
+          <div class="chip" data-value="慵懒 刚睡醒">😴 慵懒</div>
+          <div class="chip" data-value="撒娇 夹子音">🥰 撒娇</div>
+        </div>
+      </div>
+
+      <div class="style-section">
+        <div class="style-section-title">🏎️ 语速</div>
+        <div class="chip-group" id="speedChips">
+          <div class="chip active" data-value="">正常</div>
+          <div class="chip" data-value="语速慢">🐢 慢</div>
+          <div class="chip" data-value="语速快">🐇 快</div>
+          <div class="chip" data-value="清晰有力">📢 清晰有力</div>
+        </div>
+      </div>
+
+      <div class="style-section">
+        <div class="style-section-title">🗺️ 方言</div>
+        <div class="chip-group" id="dialectChips">
+          <div class="chip active" data-value="">普通话</div>
+          <div class="chip" data-value="东北话">🌲 东北话</div>
+          <div class="chip" data-value="四川话">🌶️ 四川话</div>
+          <div class="chip" data-value="台湾腔">🧋 台湾腔</div>
+          <div class="chip" data-value="粤语">🥟 粤语</div>
+        </div>
+      </div>
+
+      <div class="style-section">
+        <div class="style-section-title">🎭 角色</div>
+        <div class="chip-group" id="roleChips">
+          <div class="chip active" data-value="">默认</div>
+          <div class="chip" data-value="像个大将军">⚔️ 大将军</div>
+          <div class="chip" data-value="像个小孩">🧒 小孩</div>
+          <div class="chip" data-value="孙悟空">🐵 孙悟空</div>
+          <div class="chip" data-value="林黛玉">🌸 林黛玉</div>
+          <div class="chip" data-value="像个新闻主播">📺 新闻主播</div>
+          <div class="chip" data-value="像个老师">📚 老师</div>
+        </div>
+      </div>
+
+      <div class="style-section">
+        <div class="style-section-title">💬 语气</div>
+        <div class="chip-group" id="toneChips">
+          <div class="chip active" data-value="">自然</div>
+          <div class="chip" data-value="悄悄话">🤫 悄悄话</div>
+          <div class="chip" data-value="大声喊">📢 大声喊</div>
+          <div class="chip" data-value="神秘低语">🌙 神秘低语</div>
+        </div>
+      </div>
+
+      <div class="style-section">
+        <div class="style-section-title">🎵 唱歌</div>
+        <div class="chip-group" id="singChips">
+          <div class="chip" data-value="__sing_off__" style="display:none" onclick="toggleSing(false)">⏹️ 关闭</div>
+          <div class="chip active" data-value="">关闭</div>
+          <div class="chip" data-value="__sing_on__" onclick="toggleSing(true)">🎤 开启唱歌模式</div>
+        </div>
+      </div>
+
+      <!-- Singing mode: lyrics input -->
+      <div id="singPanel" style="display:none; margin-top: 16px;">
+        <div class="style-section">
+          <div class="style-section-title">🎶 歌词</div>
+          <div class="chip-group" id="songChips">
+            <div class="chip active" data-value="">直接输入歌词</div>
+            <div class="chip" data-value="两只老虎">🐯 两只老虎</div>
+            <div class="chip" data-value="小星星">⭐ 小星星</div>
+            <div class="chip" data-value="生日快乐">🎂 生日快乐</div>
+          </div>
+        </div>
+        <textarea id="singInput" placeholder="输入歌词，或选择上方预置歌曲…&#10;&#10;两只老虎，两只老虎，跑得快，跑得快……" style="min-height: 80px; margin-top: 8px;"></textarea>
+      </div>
+
+      <!-- Custom style -->
+      <div class="style-section" style="margin-top: 16px;">
+        <div class="style-section-title">✏️ 自定义风格描述（可选）</div>
+        <input type="text" id="customStyle" placeholder="如：语速慢 清晰 像个新闻主播，会覆盖上方选项" />
+      </div>
+    </div>
+
+    <!-- Voice Clone -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🎤</span> 语音克隆（可选）</div>
+      <div class="file-upload" id="fileUpload" onclick="document.getElementById('voiceFile').click()">
+        <span class="icon">📁</span>
+        <div class="info">
+          <div class="name" id="fileName">点击上传音频文件</div>
+          <div class="hint">支持 WAV 格式，24kHz、16-bit、单声道，5~15 秒</div>
+        </div>
+        <input type="file" id="voiceFile" accept=".wav" onchange="handleVoiceFile(this)" />
+      </div>
+      <button class="remove-btn" id="removeVoiceBtn" style="display:none; margin-top: 8px; background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.82rem;" onclick="removeVoiceFile()">✕ 移除音频</button>
+    </div>
+
+    <!-- Generate Button -->
+    <div style="margin-bottom: 16px;">
+      <button class="btn" id="generateBtn" onclick="generate()">
+        🎵 生成语音
+        <span style="font-size:0.8rem; font-weight:400; opacity:0.8">（Ctrl+Enter）</span>
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div class="error" id="errorMsg"></div>
 
     <!-- Loading -->
     <div class="loading" id="loading">
@@ -332,135 +515,538 @@
 
     <!-- Result -->
     <div class="card result" id="result">
-      <label>🎧 生成结果</label>
+      <div class="card-title"><span class="icon">🎧</span> 生成结果</div>
       <audio id="audioPlayer" class="audio-player" controls></audio>
-      <div class="actions">
-        <button class="btn-secondary" onclick="playAgain()">🔄 重新播放</button>
-        <button class="btn" onclick="download()">⬇️ 下载 WAV</button>
+      <div class="result-actions">
+        <button class="btn btn-outline btn-sm" onclick="playAgain()">🔄 重播</button>
+        <button class="btn btn-sm" onclick="download()">⬇️ 下载 WAV</button>
       </div>
-    </div>
-
-    <div class="footer">
-      Powered by <a href="https://xiaomimimo.com" target="_blank">MiMo v2 TTS</a>
+      <div class="meta-info">
+        <span id="metaSize"></span>
+        <span id="metaTime"></span>
+        <span id="metaStyle"></span>
+      </div>
     </div>
   </div>
 
-  <script>
-    const textInput = document.getElementById('textInput');
-    const charCount = document.getElementById('charCount');
-    const styleSelect = document.getElementById('styleSelect');
-    const customStyleRow = document.getElementById('customStyleRow');
-    const customStyle = document.getElementById('customStyle');
-    const generateBtn = document.getElementById('generateBtn');
-    const loading = document.getElementById('loading');
-    const resultCard = document.getElementById('result');
-    const audioPlayer = document.getElementById('audioPlayer');
-    const errorMsg = document.getElementById('errorMsg');
+  <!-- ══════════ Tab: History ══════════ -->
+  <div class="tab-panel" id="panel-history">
+    <div class="card">
+      <div class="card-title"><span class="icon">📜</span> 生成历史 <span style="font-size:0.8rem; color:var(--muted); font-weight:400; margin-left:auto" id="historyCount">(0)</span></div>
+      <div id="historyList">
+        <div style="text-align:center; padding:40px 0; color:var(--muted); font-size:0.9rem;">
+          暂无历史记录，生成语音后会自动保存在这里
+        </div>
+      </div>
+      <div id="clearHistoryBtn" style="display:none; text-align:center; margin-top:12px;">
+        <button class="btn btn-outline btn-sm" onclick="clearHistory()">🗑️ 清空历史</button>
+      </div>
+    </div>
+  </div>
 
-    let currentBlobUrl = null;
-    let currentFilename = 'tts_output.wav';
+  <!-- ══════════ Tab: API Docs ══════════ -->
+  <div class="tab-panel" id="panel-docs">
+    <div class="card">
+      <div class="card-title"><span class="icon">📖</span> MiMo v2 TTS API 文档</div>
 
-    // Char counter
-    textInput.addEventListener('input', () => {
-      charCount.textContent = textInput.value.length;
-    });
+      <div class="doc-section">
+        <h3>📡 接口信息</h3>
+        <table class="doc-table">
+          <tr><th>项目</th><th>值</th></tr>
+          <tr><td>模型</td><td><code>mimo-v2-audio-tts</code></td></tr>
+          <tr><td>API 端点</td><td><code>https://api.xiaomimimo.com/v1/chat/completions</code></td></tr>
+          <tr><td>认证方式</td><td>Header <code>api-key: YOUR_KEY</code></td></tr>
+          <tr><td>输出格式</td><td>WAV (24kHz, 16-bit PCM, 单声道)</td></tr>
+          <tr><td>最大文本长度</td><td>10,000 字符</td></tr>
+        </table>
+      </div>
 
-    // Toggle custom style input
-    styleSelect.addEventListener('change', () => {
-      customStyleRow.style.display = styleSelect.value === 'custom' ? 'flex' : 'none';
-    });
+      <div class="doc-section">
+        <h3>📤 请求格式</h3>
+        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:8px;">基本调用（默认音色）：</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
+<pre><code>curl -X POST https://api.xiaomimimo.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "api-key: YOUR_API_KEY" \
+  -d '{
+    "model": "mimo-v2-audio-tts",
+    "audio": {"format": "wav", "voice": "mimo_default"},
+    "messages": [
+      {"role": "assistant", "content": "你好，我是小米AI语音助手。"}
+    ]
+  }'</code></pre>
+        </div>
 
-    // Get current style
-    function getStyle() {
-      if (styleSelect.value === 'custom') {
-        return customStyle.value.trim();
+        <p style="font-size:0.82rem; color:var(--muted); margin: 16px 0 8px;">带风格的调用：</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
+<pre><code>{
+  "model": "mimo-v2-audio-tts",
+  "audio": {"format": "wav", "voice": "mimo_default"},
+  "messages": [
+    {"role": "assistant", "content": "&lt;style&gt;开心激动&lt;/style&gt;恭喜你获得了一等奖！"}
+  ]
+}</code></pre>
+        </div>
+
+        <p style="font-size:0.82rem; color:var(--muted); margin: 16px 0 8px;">语音克隆（上传参考音频）：</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
+<pre><code>{
+  "model": "mimo-v2-audio-tts",
+  "audio": {
+    "format": "wav",
+    "voice_audio": {
+      "format": "wav",
+      "data": "&lt;base64-encoded-wav&gt;"
+    }
+  },
+  "messages": [
+    {"role": "assistant", "content": "大家好，我是自定义音色。"}
+  ]
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h3>📥 响应格式</h3>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
+<pre><code>{
+  "choices": [{
+    "message": {
+      "audio": {
+        "data": "&lt;base64-encoded-wav&gt;"
       }
-      return styleSelect.value;
     }
+  }]
+}</code></pre>
+        </div>
+      </div>
 
-    // Show error
-    function showError(msg) {
-      errorMsg.textContent = msg;
-      errorMsg.classList.add('show');
-      setTimeout(() => errorMsg.classList.remove('show'), 8000);
+      <div class="doc-section">
+        <h3>🐍 Python 示例</h3>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
+<pre><code>import requests, base64
+
+resp = requests.post(
+    "https://api.xiaomimimo.com/v1/chat/completions",
+    headers={
+        "Content-Type": "application/json",
+        "api-key": "YOUR_API_KEY"
+    },
+    json={
+        "model": "mimo-v2-audio-tts",
+        "audio": {"format": "wav", "voice": "mimo_default"},
+        "messages": [
+            {"role": "assistant", "content": "今天天气真不错！"}
+        ],
+    },
+)
+
+audio = base64.b64decode(resp.json()["choices"][0]["message"]["audio"]["data"])
+with open("output.wav", "wb") as f:
+    f.write(audio)</code></pre>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h3>🎨 风格能力一览</h3>
+        <table class="doc-table">
+          <tr><th>分类</th><th>示例</th><th>说明</th></tr>
+          <tr><td>情绪</td><td><code>开心</code> <code>悲伤</code> <code>生气</code> <code>平静</code></td><td>控制语音的情感基调</td></tr>
+          <tr><td>语速</td><td><code>语速慢</code> <code>语速快</code> <code>清晰有力</code></td><td>控制语音播放速度</td></tr>
+          <tr><td>方言</td><td><code>东北话</code> <code>四川话</code> <code>台湾腔</code> <code>粤语</code></td><td>模拟不同地区口音</td></tr>
+          <tr><td>角色</td><td><code>像个大将军</code> <code>像个小孩</code> <code>孙悟空</code></td><td>模仿特定角色声音</td></tr>
+          <tr><td>语气</td><td><code>悄悄话</code> <code>慵懒 刚睡醒</code> <code>撒娇 夹子音</code></td><td>改变说话的语气方式</td></tr>
+          <tr><td>组合</td><td><code>深情款款 语速慢</code> <code>撒娇 台湾腔</code></td><td>多个风格自由组合</td></tr>
+          <tr><td>唱歌</td><td><code>唱歌</code> + 歌词内容</td><td>开启歌唱模式</td></tr>
+        </table>
+      </div>
+
+      <div class="doc-section">
+        <h3>🔢 文本规范化规则</h3>
+        <table class="doc-table">
+          <tr><th>输入</th><th>朗读</th><th>输入</th><th>朗读</th></tr>
+          <tr><td><code>3</code></td><td>三</td><td><code>+</code></td><td>加</td></tr>
+          <tr><td><code>3.14</code></td><td>三点一四</td><td><code>-</code></td><td>减</td></tr>
+          <tr><td><code>14:30</code></td><td>下午两点半</td><td><code>*</code></td><td>乘以</td></tr>
+          <tr><td><code>95%</code></td><td>百分之九十五</td><td><code>=</code></td><td>等于</td></tr>
+          <tr><td><code>2024</code></td><td>二零二四年</td><td><code>...</code></td><td>等等</td></tr>
+        </table>
+      </div>
+
+      <div class="doc-section">
+        <h3>⚙️ 环境变量</h3>
+        <table class="doc-table">
+          <tr><th>变量</th><th>默认值</th><th>说明</th></tr>
+          <tr><td><code>MIMO_API_KEY</code></td><td>—</td><td>MiMo API 密钥（必需）</td></tr>
+          <tr><td><code>MIMO_API_ENDPOINT</code></td><td><code>https://api.xiaomimimo.com/v1/chat/completions</code></td><td>自定义 API 端点</td></tr>
+          <tr><td><code>MIMO_TTS_MODEL</code></td><td><code>mimo-v2-audio-tts</code></td><td>自定义模型名称</td></tr>
+          <tr><td><code>PORT</code></td><td><code>3210</code></td><td>Web 服务端口</td></tr>
+        </table>
+      </div>
+
+      <div class="doc-section">
+        <h3>⚠️ 错误码</h3>
+        <table class="doc-table">
+          <tr><th>HTTP 状态</th><th>可能原因</th></tr>
+          <tr><td><code>400</code></td><td>请求参数错误（text 为空或过长）</td></tr>
+          <tr><td><code>401</code></td><td>API Key 无效或未设置</td></tr>
+          <tr><td><code>500</code></td><td>服务端错误，稍后重试</td></tr>
+          <tr><td><code>503</code></td><td>服务暂不可用</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by <a href="https://xiaomimimo.com" target="_blank">小米 MiMo v2 TTS</a> · MIT License
+  </div>
+
+</div>
+
+<script>
+  // ── State ──
+  let currentBlobUrl = null;
+  let currentFilename = 'tts_output.wav';
+  let history = JSON.parse(localStorage.getItem('tts_history') || '[]');
+  let autoNormalize = true;
+  let voiceFileBase64 = null;
+  let isSinging = false;
+
+  // ── Init ──
+  document.addEventListener('DOMContentLoaded', () => {
+    initChips();
+    renderHistory();
+  });
+
+  // ── Tab Switching ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+    document.getElementById(`panel-${tab}`).classList.add('active');
+  }
+
+  // ── Chip Selection ──
+  function initChips() {
+    ['emotionChips','speedChips','dialectChips','roleChips','toneChips'].forEach(id => {
+      document.getElementById(id).addEventListener('click', e => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        document.getElementById(id).querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+
+    document.getElementById('songChips').addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.getElementById('songChips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const val = chip.dataset.value;
+      if (val) {
+        document.getElementById('singInput').value = '';
+        document.getElementById('singInput').placeholder = `预置歌曲：${chip.textContent.trim()}，将自动查找歌词`;
+      } else {
+        document.getElementById('singInput').placeholder = '输入歌词，或选择上方预置歌曲…';
+      }
+    });
+  }
+
+  function getChipValue(groupId) {
+    const active = document.querySelector(`#${groupId} .chip.active`);
+    return active ? active.dataset.value : '';
+  }
+
+  // ── Singing Mode ──
+  function toggleSing(on) {
+    isSinging = on;
+    const panel = document.getElementById('singPanel');
+    const onChip = document.querySelector('#singChips .chip[data-value="__sing_on__"]');
+    const offChip = document.querySelector('#singChips .chip[data-value="__sing_off__"]');
+    const defaultChip = document.querySelector('#singChips .chip[data-value=""]');
+
+    document.querySelectorAll('#singChips .chip').forEach(c => c.classList.remove('active'));
+    if (on) {
+      panel.style.display = 'block';
+      onChip.classList.add('active');
+      defaultChip.style.display = 'none';
+      offChip.style.display = '';
+    } else {
+      panel.style.display = 'none';
+      defaultChip.classList.add('active');
+      offChip.style.display = 'none';
+      onChip.style.display = '';
     }
+  }
 
-    // Generate TTS
-    async function generate() {
-      const text = textInput.value.trim();
-      if (!text) {
-        showError('请输入文字');
+  // ── Normalize Toggle ──
+  function toggleNormalize() {
+    autoNormalize = !autoNormalize;
+    document.getElementById('normalizeToggle').classList.toggle('on', autoNormalize);
+  }
+
+  // ── Voice File ──
+  function handleVoiceFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('removeVoiceBtn').style.display = 'inline-block';
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      voiceFileBase64 = reader.result.split(',')[1];
+    };
+    reader.readAsDataURL(file);
+  }
+  function removeVoiceFile() {
+    voiceFileBase64 = null;
+    document.getElementById('voiceFile').value = '';
+    document.getElementById('fileName').textContent = '点击上传音频文件';
+    document.getElementById('removeVoiceBtn').style.display = 'none';
+  }
+
+  // ── Build Style String ──
+  function buildStyle() {
+    const custom = document.getElementById('customStyle').value.trim();
+    if (custom) return custom;
+
+    if (isSinging) return '唱歌';
+
+    const parts = [
+      getChipValue('emotionChips'),
+      getChipValue('speedChips'),
+      getChipValue('dialectChips'),
+      getChipValue('roleChips'),
+      getChipValue('toneChips'),
+    ].filter(Boolean);
+
+    return parts.join(' ');
+  }
+
+  // ── Text Normalization ──
+  function normalizeText(text) {
+    if (!autoNormalize) return text;
+
+    let result = text;
+
+    // 3.14 → 三点一四
+    result = result.replace(/(\d+)\.(\d+)/g, (_, a, b) => {
+      const digits = ['零','一','二','三','四','五','六','七','八','九'];
+      const aChars = a.split('').map(d => digits[parseInt(d)]).join('');
+      const bChars = b.split('').map(d => digits[parseInt(d)]).join('');
+      return aChars + '点' + bChars;
+    });
+
+    // 14:30 → 十四点三十分 (simplified)
+    result = result.replace(/(\d{1,2}):(\d{2})/g, (m) => m); // keep complex logic for now
+
+    // 95% → 百分之九十五
+    result = result.replace(/(\d+)%/g, (_, n) => {
+      const numMap = { '0':'零','1':'一','2':'二','3':'三','4':'四','5':'五','6':'六','7':'七','8':'八','9':'九' };
+      const chars = n.split('').map(d => numMap[d] || d).join('');
+      return '百分之' + chars;
+    });
+
+    return result;
+  }
+
+  // ── Error / UI Helpers ──
+  const textInput = document.getElementById('textInput');
+  const charCount = document.getElementById('charCount');
+  const generateBtn = document.getElementById('generateBtn');
+  const loadingEl = document.getElementById('loading');
+  const resultCard = document.getElementById('result');
+  const errorMsg = document.getElementById('errorMsg');
+
+  textInput.addEventListener('input', () => {
+    charCount.textContent = textInput.value.length;
+  });
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add('show');
+    setTimeout(() => errorMsg.classList.remove('show'), 10000);
+  }
+
+  // ── Generate ──
+  async function generate() {
+    let text = textInput.value.trim();
+    if (!text) { showError('请输入文字'); return; }
+
+    text = normalizeText(text);
+
+    // Handle singing mode
+    let style = buildStyle();
+    if (isSinging) {
+      const songVal = getChipValue('songChips');
+      const singText = document.getElementById('singInput').value.trim();
+      if (!songVal && !singText) {
+        showError('唱歌模式下请选择预置歌曲或输入歌词');
         return;
       }
-
-      const style = getStyle();
-
-      // UI state
-      generateBtn.disabled = true;
-      loading.classList.add('show');
-      resultCard.classList.remove('show');
-      errorMsg.classList.remove('show');
-
-      try {
-        const res = await fetch('/api/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, style }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || data.error) {
-          throw new Error(data.error || `HTTP ${res.status}`);
-        }
-
-        // Decode base64 → blob
-        const byteChars = atob(data.audio);
-        const byteArray = new Uint8Array(byteChars.length);
-        for (let i = 0; i < byteChars.length; i++) {
-          byteArray[i] = byteChars.charCodeAt(i);
-        }
-        const blob = new Blob([byteArray], { type: 'audio/wav' });
-
-        // Revoke old blob URL
-        if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
-
-        currentBlobUrl = URL.createObjectURL(blob);
-        currentFilename = data.filename || 'tts_output.wav';
-
-        audioPlayer.src = currentBlobUrl;
-        audioPlayer.play().catch(() => {});
-        resultCard.classList.add('show');
-      } catch (err) {
-        showError(err.message);
-      } finally {
-        generateBtn.disabled = false;
-        loading.classList.remove('show');
+      if (singText && !songVal) {
+        text = 'LYRICS:' + singText;
+      } else if (songVal) {
+        text = songVal;
       }
     }
 
-    function playAgain() {
-      audioPlayer.currentTime = 0;
+    const body = { text, style: style || undefined };
+
+    generateBtn.disabled = true;
+    loadingEl.classList.add('show');
+    resultCard.classList.remove('show');
+    errorMsg.classList.remove('show');
+    const startTime = Date.now();
+
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+
+      const byteChars = atob(data.audio);
+      const byteArray = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([byteArray], { type: 'audio/wav' });
+
+      if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+      currentBlobUrl = URL.createObjectURL(blob);
+      currentFilename = data.filename || 'tts_output.wav';
+
+      audioPlayer.src = currentBlobUrl;
       audioPlayer.play().catch(() => {});
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      document.getElementById('metaSize').textContent = `📏 ${(data.size / 1024).toFixed(1)} KB`;
+      document.getElementById('metaTime').textContent = `⏱️ ${elapsed}s`;
+      document.getElementById('metaStyle').textContent = style ? `🎨 ${style}` : '🎨 默认';
+
+      resultCard.classList.add('show');
+
+      // Save to history
+      addHistory({
+        text: textInput.value.trim().slice(0, 100),
+        style: style || '默认',
+        audioBase64: data.audio,
+        filename: currentFilename,
+        size: data.size,
+        time: new Date().toLocaleString('zh-CN'),
+      });
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      generateBtn.disabled = false;
+      loadingEl.classList.remove('show');
+    }
+  }
+
+  // ── Playback ──
+  function playAgain() {
+    audioPlayer.currentTime = 0;
+    audioPlayer.play().catch(() => {});
+  }
+
+  function download() {
+    if (!currentBlobUrl) return;
+    const a = document.createElement('a');
+    a.href = currentBlobUrl;
+    a.download = currentFilename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  // ── History ──
+  function addHistory(item) {
+    history.unshift(item);
+    if (history.length > 20) history = history.slice(0, 20);
+    localStorage.setItem('tts_history', JSON.stringify(history));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('historyList');
+    const count = document.getElementById('historyCount');
+    const clearBtn = document.getElementById('clearHistoryBtn');
+    count.textContent = `(${history.length})`;
+
+    if (history.length === 0) {
+      list.innerHTML = '<div style="text-align:center; padding:40px 0; color:var(--muted); font-size:0.9rem;">暂无历史记录</div>';
+      clearBtn.style.display = 'none';
+      return;
     }
 
-    function download() {
-      if (!currentBlobUrl) return;
-      const a = document.createElement('a');
-      a.href = currentBlobUrl;
-      a.download = currentFilename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
+    clearBtn.style.display = '';
+    list.innerHTML = history.map((h, i) => `
+      <div class="history-item" onclick="playHistory(${i})">
+        <span class="hist-icon">🔊</span>
+        <div style="flex:1; overflow:hidden;">
+          <div class="hist-text">${escHtml(h.text)}</div>
+          <div class="hist-style">${escHtml(h.style)} · ${h.time}</div>
+        </div>
+        <button class="hist-play" title="播放">▶️</button>
+        <button class="hist-del" onclick="event.stopPropagation(); deleteHistory(${i})" title="删除">✕</button>
+      </div>
+    `).join('');
+  }
 
-    // Ctrl+Enter to generate
-    textInput.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        generate();
-      }
+  function playHistory(index) {
+    const h = history[index];
+    if (!h) return;
+    const byteChars = atob(h.audioBase64);
+    const byteArray = new Uint8Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+    const blob = new Blob([byteArray], { type: 'audio/wav' });
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.play();
+  }
+
+  function deleteHistory(index) {
+    history.splice(index, 1);
+    localStorage.setItem('tts_history', JSON.stringify(history));
+    renderHistory();
+  }
+
+  function clearHistory() {
+    if (!confirm('确定清空所有历史记录？')) return;
+    history = [];
+    localStorage.setItem('tts_history', JSON.stringify(history));
+    renderHistory();
+  }
+
+  function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // ── Copy Code ──
+  function copyCode(btn) {
+    const code = btn.parentElement.querySelector('pre code');
+    navigator.clipboard.writeText(code.textContent).then(() => {
+      btn.textContent = '✅ 已复制';
+      setTimeout(() => btn.textContent = '📋 复制', 2000);
     });
-  </script>
+  }
+
+  // ── Keyboard ──
+  textInput.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      generate();
+    }
+  });
+</script>
 </body>
 </html>

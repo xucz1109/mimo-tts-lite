@@ -2,8 +2,6 @@
 /**
  * MiMo TTS Web — Backend Server
  *
- * Exposes a single-page web UI for text-to-speech via the MiMo v2 TTS API.
- *
  * Env vars:
  *   MIMO_API_KEY      (required) MiMo platform API key
  *   MIMO_API_ENDPOINT (optional) Override API endpoint
@@ -21,22 +19,41 @@ const os = require('os');
 const app = express();
 const PORT = process.env.PORT || 3210;
 
-// Parse JSON bodies (1 MB limit)
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Health ─────────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
-  const hasKey = !!process.env.MIMO_API_KEY;
+  const hasKey = !!process.env.MIMO_API_KEY || hasOpenClawKey();
   res.json({ status: 'ok', hasApiKey: hasKey });
 });
+
+function hasOpenClawKey() {
+  const p = path.join(os.homedir(), '.openclaw', 'openclaw.json');
+  try {
+    if (fs.existsSync(p)) {
+      const cfg = JSON.parse(fs.readFileSync(p, 'utf8'));
+      return !!cfg.models?.providers?.xiaomi?.apiKey;
+    }
+  } catch {}
+  return false;
+}
+
+function getApiKey() {
+  if (process.env.MIMO_API_KEY) return process.env.MIMO_API_KEY;
+  const p = path.join(os.homedir(), '.openclaw', 'openclaw.json');
+  try {
+    const cfg = JSON.parse(fs.readFileSync(p, 'utf8'));
+    return cfg.models?.providers?.xiaomi?.apiKey;
+  } catch {}
+  return null;
+}
 
 // ── TTS endpoint ───────────────────────────────────────────────────────────
 app.post('/api/tts', async (req, res) => {
   try {
-    const { text, style } = req.body;
+    const { text, style, voiceAudioBase64 } = req.body;
 
-    // Validate
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return res.status(400).json({ error: 'text is required' });
     }
@@ -44,67 +61,60 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'text too long (max 10000 chars)' });
     }
 
-    // Prepare temp files
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      return res.status(500).json({ error: 'MIMO_API_KEY not configured' });
+    }
+
     const id = crypto.randomUUID();
     const tmpDir = os.tmpdir();
     const outPath = path.join(tmpDir, `tts_${id}.wav`);
 
-    // Build command — call the TTS script
+    // Build script args
     const scriptPath = path.join(__dirname, 'scripts', 'tts_to_wav.sh');
     const args = [scriptPath, text.trim(), outPath];
     if (style && typeof style === 'string' && style.trim()) {
       args.push(style.trim());
     }
 
-    // Pass API key via env
-    const env = { ...process.env };
-    if (!env.MIMO_API_KEY) {
-      // Try reading from openclaw.json
-      const openclawConfig = path.join(os.homedir(), '.openclaw', 'openclaw.json');
-      if (fs.existsSync(openclawConfig)) {
-        try {
-          const config = JSON.parse(fs.readFileSync(openclawConfig, 'utf8'));
-          env.MIMO_API_KEY = config.models?.providers?.xiaomi?.apiKey;
-        } catch { /* ignore */ }
-      }
+    // Voice clone: write temp wav file
+    let voiceSamplePath = null;
+    if (voiceAudioBase64) {
+      voiceSamplePath = path.join(tmpDir, `voice_${id}.wav`);
+      fs.writeFileSync(voiceSamplePath, Buffer.from(voiceAudioBase64, 'base64'));
+      args.push(voiceSamplePath);
     }
 
-    if (!env.MIMO_API_KEY) {
-      return res.status(500).json({ error: 'MIMO_API_KEY not configured. Set it as env var or in ~/.openclaw/openclaw.json' });
-    }
+    const env = { ...process.env, MIMO_API_KEY: apiKey };
 
-    // Execute TTS
-    let stderr = '';
     try {
       execFileSync('bash', args, {
         env,
-        timeout: 120000, // 2 min
+        timeout: 120000,
         maxBuffer: 50 * 1024 * 1024,
         stdio: ['pipe', 'pipe', 'pipe'],
       });
     } catch (err) {
-      stderr = (err.stderr || err.message || '').toString();
-      // Clean up temp file
+      const stderr = (err.stderr || err.message || '').toString();
       try { fs.unlinkSync(outPath); } catch {}
+      try { if (voiceSamplePath) fs.unlinkSync(voiceSamplePath); } catch {}
       return res.status(500).json({ error: stderr || 'TTS generation failed' });
     }
 
-    // Read result
+    // Cleanup voice sample
+    try { if (voiceSamplePath) fs.unlinkSync(voiceSamplePath); } catch {}
+
     if (!fs.existsSync(outPath) || fs.statSync(outPath).size === 0) {
       return res.status(500).json({ error: 'TTS returned empty file' });
     }
 
     const wavBuffer = fs.readFileSync(outPath);
-    const fileBase64 = wavBuffer.toString('base64');
-    const fileSize = wavBuffer.length;
-
-    // Cleanup
     try { fs.unlinkSync(outPath); } catch {}
 
     return res.json({
       success: true,
-      audio: fileBase64,
-      size: fileSize,
+      audio: wavBuffer.toString('base64'),
+      size: wavBuffer.length,
       filename: `tts_${id}.wav`,
     });
   } catch (err) {
@@ -113,7 +123,6 @@ app.post('/api/tts', async (req, res) => {
   }
 });
 
-// ── Start ──────────────────────────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🎙️  MiMo TTS Web listening on http://localhost:${PORT}`);
 });
