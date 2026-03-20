@@ -99,7 +99,18 @@ app.post('/api/tts', async (req, res) => {
       const stderr = (err.stderr || err.message || '').toString();
       try { fs.unlinkSync(outPath); } catch {}
       try { if (voiceSamplePath) fs.unlinkSync(voiceSamplePath); } catch {}
-      return res.status(500).json({ error: stderr || 'TTS generation failed' });
+
+      // Friendly error messages for common API errors
+      let userMsg = stderr;
+      if (stderr.includes('402') || stderr.includes('insufficient_balance') || stderr.includes('Insufficient')) {
+        userMsg = '❌ MiMo 账号余额不足，请前往 xiaomimimo.com 充值后重试';
+      } else if (stderr.includes('401') || stderr.includes('Unauthorized') || stderr.includes('invalid')) {
+        userMsg = '❌ API Key 无效，请检查输入是否正确';
+      } else if (stderr.includes('429') || stderr.includes('rate')) {
+        userMsg = '❌ 请求过于频繁，请稍后重试';
+      }
+
+      return res.status(500).json({ error: userMsg });
     }
 
     // Cleanup voice sample

@@ -384,6 +384,7 @@
         <button class="btn btn-outline btn-sm" style="width:auto; white-space:nowrap;" onclick="toggleKeyVisibility()">
           <span id="keyEyeIcon">👁️</span>
         </button>
+        <button class="btn btn-outline btn-sm" style="width:auto; white-space:nowrap; color:var(--accent); border-color:var(--accent);" onclick="testApiKey()">🔍 测试</button>
         <button class="btn btn-sm" style="width:auto; white-space:nowrap;" onclick="saveApiKey()">保存</button>
       </div>
       <div id="apiKeyStatus" style="font-size:0.78rem; margin-top:8px; color:var(--muted);">
@@ -774,6 +775,27 @@ with open("output.wav", "wb") as f:
     } else {
       input.type = 'password';
       icon.textContent = '👁️';
+    }
+  }
+  async function testApiKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    const status = document.getElementById('apiKeyStatus');
+    if (!key) { status.innerHTML = '<span style="color:var(--danger)">请先输入 API Key</span>'; return; }
+    status.innerHTML = '<span style="color:var(--warning)">⏳ 正在测试...</span>';
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: '测试', apiKey: key }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        status.innerHTML = '<span style="color:var(--success)">✅ API Key 有效，可用！</span>';
+      } else {
+        status.innerHTML = `<span style="color:var(--danger)">❌ ${escHtml(data.error || '验证失败')}</span>`;
+      }
+    } catch (e) {
+      status.innerHTML = `<span style="color:var(--danger)">❌ 网络错误: ${escHtml(e.message)}</span>`;
     }
   }
 
