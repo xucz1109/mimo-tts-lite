@@ -418,9 +418,9 @@
         <div class="chip" data-value="绘声绘色">🎭 绘声绘色</div>
       </div>
 
-      <!-- Custom style override -->
-      <span class="section-label">✏️ 自定义风格（覆盖上方选项）</span>
-      <input type="text" id="customStyle" placeholder="如：语速慢 清晰 像个新闻主播" />
+      <!-- Custom requirements -->
+      <span class="section-label">✏️ 自定义要求（与上方选项融合）</span>
+      <input type="text" id="customStyle" placeholder="如：标准广播腔，抑扬顿挫，断句增加500ms" />
     </div>
 
     <!-- Parameters -->
@@ -531,14 +531,27 @@
     return active ? active.dataset.value : '';
   }
 
-  // ── Build Style String ──
+  // ── Build Style String (merge chips + custom) ──
   function buildStyle() {
-    const custom = document.getElementById('customStyle').value.trim();
-    if (custom) return custom;
-    return [
+    const parts = [
       getChipValue('emotionChips'),
       getChipValue('toneChips'),
-    ].filter(Boolean).join(' ');
+    ].filter(Boolean);
+
+    const custom = document.getElementById('customStyle').value.trim();
+    if (custom) {
+      parts.push(custom);
+    }
+    return parts.join(' ');
+  }
+
+  // Parse pause override from custom style: "断句增加500ms" / "停顿800ms" etc.
+  function parsePauseOverride() {
+    const custom = document.getElementById('customStyle').value.trim();
+    if (!custom) return null;
+    const m = custom.match(/(?:断句|停顿|pause)\s*(?:增加)?(\d+)\s*(?:ms|毫秒)?/i);
+    if (m) return parseInt(m[1]);
+    return null;
   }
 
   // ── Undo / Redo ──
@@ -620,6 +633,9 @@
 
     const style = buildStyle();
     const voice = getChipValue('voiceChips');
+    const pauseOverride = parsePauseOverride();
+    const sliderPause = parseInt(document.getElementById('pauseSlider').value);
+    const finalPause = pauseOverride !== null ? pauseOverride : sliderPause;
 
     try {
       const body = {
@@ -630,7 +646,7 @@
         speed: parseFloat(document.getElementById('speedSlider').value),
         pitch: parseInt(document.getElementById('pitchSlider').value),
         volume: parseInt(document.getElementById('volumeSlider').value),
-        pauseMs: parseInt(document.getElementById('pauseSlider').value),
+        pauseMs: finalPause,
       };
       const pageApiKey = document.getElementById('apiKeyInput').value.trim();
       if (pageApiKey) body.apiKey = pageApiKey;
