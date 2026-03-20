@@ -443,6 +443,40 @@
       border-color: var(--accent);
     }
 
+    /* ── Quick Tags (preset & custom) ── */
+    .chip.qt {
+      font-size: 0.76rem;
+      padding: 4px 10px;
+    }
+    .chip.qt:hover { border-color: var(--accent); color: var(--accent); }
+    .custom-tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: var(--accent-light);
+      border: 1px solid var(--accent);
+      border-radius: 16px;
+      font-size: 0.76rem;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .custom-tag-chip:hover { background: var(--accent); color: #fff; }
+    .custom-tag-chip .ct-del {
+      display: inline-block;
+      width: 14px; height: 14px;
+      line-height: 14px;
+      text-align: center;
+      font-size: 0.65rem;
+      background: rgba(0,0,0,0.1);
+      border-radius: 50%;
+      cursor: pointer;
+      margin-left: 2px;
+    }
+    .custom-tag-chip .ct-del:hover { background: var(--danger); color: #fff; }
+
     /* ── Line Preview ── */
     .line-preview {
       margin-top: 6px;
@@ -782,6 +816,80 @@
       </div>
     </div>
 
+    <!-- Quick Tags (preset + custom) -->
+    <div class="card">
+      <div class="card-title"><span class="icon">⚡</span> 快捷标签
+        <span style="margin-left:auto; font-size:0.72rem; font-weight:400; color:var(--muted);">点击插入到文本</span>
+      </div>
+
+      <!-- Preset quick tags -->
+      <div class="style-section">
+        <div class="style-section-title">📌 预设标签</div>
+        <div class="chip-group" id="presetQuickTags">
+          <div class="chip qt" data-tag="男声">👨 男声</div>
+          <div class="chip qt" data-tag="女声">👩 女声</div>
+          <div class="chip qt" data-tag="童声">🧒 童声</div>
+          <div class="chip qt" data-tag="老人声">👴 老人</div>
+          <div class="chip qt" data-tag="机器人声">🤖 机器</div>
+          <div class="chip qt" data-tag="温柔">🫧 温柔</div>
+          <div class="chip qt" data-tag="磁性">🧲 磁性</div>
+          <div class="chip qt" data-tag="沙哑">🪨 沙哑</div>
+          <div class="chip qt" data-tag="甜美">🍬 甜美</div>
+          <div class="chip qt" data-tag="低沉">🔉 低沉</div>
+          <div class="chip qt" data-tag="尖锐">🔔 尖锐</div>
+          <div class="chip qt" data-tag="浑厚">🥁 浑厚</div>
+          <div class="chip qt" data-tag="东北话">🌲 东北话</div>
+          <div class="chip qt" data-tag="四川话">🌶️ 四川话</div>
+          <div class="chip qt" data-tag="粤语">🥟 粤语</div>
+          <div class="chip qt" data-tag="台湾腔">🧋 台湾腔</div>
+          <div class="chip qt" data-tag="河南话">🌾 河南话</div>
+          <div class="chip qt" data-tag="上海话">🏙️ 上海话</div>
+          <div class="chip qt" data-tag="陕西话">🍜 陕西话</div>
+          <div class="chip qt" data-tag="湖南话">🌶️ 湖南话</div>
+          <div class="chip qt" data-tag="像个新闻主播">📺 主播</div>
+          <div class="chip qt" data-tag="像个老师">📚 老师</div>
+          <div class="chip qt" data-tag="像个大将军">⚔️ 将军</div>
+          <div class="chip qt" data-tag="孙悟空">🐵 孙悟空</div>
+          <div class="chip qt" data-tag="林黛玉">🌸 林黛玉</div>
+          <div class="chip qt" data-tag="像个小孩子">👶 小孩</div>
+          <div class="chip qt" data-tag="皇帝">👑 皇帝</div>
+          <div class="chip qt" data-tag="仙女">🧚 仙女</div>
+          <div class="chip qt" data-tag="开心">😊 开心</div>
+          <div class="chip qt" data-tag="悲伤">😢 悲伤</div>
+          <div class="chip qt" data-tag="愤怒">😡 愤怒</div>
+          <div class="chip qt" data-tag="恐惧">😨 恐惧</div>
+          <div class="chip qt" data-tag="惊讶">😲 惊讶</div>
+          <div class="chip qt" data-tag="深情款款">💕 深情</div>
+          <div class="chip qt" data-tag="慵懒 刚睡醒">😴 慵懒</div>
+          <div class="chip qt" data-tag="撒娇 夹子音">🥰 撒娇</div>
+          <div class="chip qt" data-tag="悄悄话">🤫 悄悄话</div>
+          <div class="chip qt" data-tag="大声喊">📢 大喊</div>
+          <div class="chip qt" data-tag="神秘低语">🌙 低语</div>
+          <div class="chip qt" data-tag="哭泣">😭 哭泣</div>
+          <div class="chip qt" data-tag="笑">😄 笑</div>
+          <div class="chip qt" data-tag="语速0.6x">🐢 极慢</div>
+          <div class="chip qt" data-tag="语速0.8x">🚶 慢速</div>
+          <div class="chip qt" data-tag="语速1.2x">🏃 快速</div>
+          <div class="chip qt" data-tag="语速1.5x">🏃 极快</div>
+          <div class="chip qt" data-tag="停顿300ms">⏸ 短停</div>
+          <div class="chip qt" data-tag="停顿800ms">⏸ 中停</div>
+          <div class="chip qt" data-tag="停顿1500ms">⏸ 长停</div>
+        </div>
+      </div>
+
+      <!-- User custom tags -->
+      <div class="style-section">
+        <div class="style-section-title">🏷️ 自定义标签</div>
+        <div class="chip-group" id="customTagsList"></div>
+        <div id="customTagsEmpty" style="font-size:0.76rem; color:var(--muted); padding:4px 0;">点击下方按钮添加你自己的标签</div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <input type="text" id="customTagInput" placeholder="标签名（如：奥特曼）" style="flex:1; font-size:0.82rem; padding:6px 10px;" />
+          <input type="text" id="customTagValue" placeholder="插入值（如：奥特曼声线）" style="flex:1.5; font-size:0.82rem; padding:6px 10px;" />
+          <button class="btn btn-sm" onclick="addCustomTag()" style="white-space:nowrap; padding:6px 12px;">＋ 添加</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Advanced Settings -->
     <div class="card">
       <div class="card-title"><span class="icon">⚙️</span> 参数调节</div>
@@ -985,6 +1093,8 @@ with open("output.wav", "wb") as f:
   // ── Init ──
   document.addEventListener('DOMContentLoaded', () => {
     initChips();
+    initQuickTags();
+    renderCustomTags();
     renderHistory();
     loadApiKey();
   });
@@ -1157,6 +1267,69 @@ with open("output.wav", "wb") as f:
     }
     if (tag) insertAtCursor('[' + tag + ']', type === 'pause');
   }
+
+  // ── Preset Quick Tags (click to insert) ──
+  function initQuickTags() {
+    document.getElementById('presetQuickTags').addEventListener('click', e => {
+      const chip = e.target.closest('.chip.qt');
+      if (!chip) return;
+      const tag = chip.dataset.tag;
+      if (tag) insertAtCursor('[' + tag + ']');
+    });
+  }
+
+  // ── Custom Tags ──
+  let customTags = JSON.parse(localStorage.getItem('mimo_custom_tags') || '[]');
+
+  function addCustomTag() {
+    const nameInput = document.getElementById('customTagInput');
+    const valueInput = document.getElementById('customTagValue');
+    const name = nameInput.value.trim();
+    const value = valueInput.value.trim();
+    if (!name || !value) return;
+    // Prevent duplicates
+    if (customTags.some(t => t.name === name)) {
+      nameInput.style.borderColor = 'var(--danger)';
+      setTimeout(() => nameInput.style.borderColor = '', 1500);
+      return;
+    }
+    customTags.push({ name, value });
+    localStorage.setItem('mimo_custom_tags', JSON.stringify(customTags));
+    nameInput.value = '';
+    valueInput.value = '';
+    renderCustomTags();
+  }
+
+  function deleteCustomTag(index) {
+    customTags.splice(index, 1);
+    localStorage.setItem('mimo_custom_tags', JSON.stringify(customTags));
+    renderCustomTags();
+  }
+
+  function renderCustomTags() {
+    const list = document.getElementById('customTagsList');
+    const empty = document.getElementById('customTagsEmpty');
+    if (customTags.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    list.innerHTML = customTags.map((t, i) =>
+      `<span class="custom-tag-chip" onclick="insertAtCursor('[${escHtml(t.value)}]')">
+        ${escHtml(t.name)}
+        <span class="ct-del" onclick="event.stopPropagation(); deleteCustomTag(${i})" title="删除">✕</span>
+      </span>`
+    ).join(' ');
+  }
+
+  // Allow Enter key to add custom tag
+  document.getElementById('customTagValue').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addCustomTag(); }
+  });
+  document.getElementById('customTagInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customTagValue').focus(); }
+  });
 
   // ── Singing ──
   function toggleSing(on) {
