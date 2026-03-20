@@ -50,7 +50,7 @@ function getApiKey() {
   return null;
 }
 
-// ── WAV builder (wrap raw PCM into WAV) ────────────────────────────────────
+// ── WAV builder ────────────────────────────────────────────────────────────
 const SAMPLE_RATE = 24000;
 const BITS_PER_SAMPLE = 16;
 const CHANNELS = 1;
@@ -80,14 +80,12 @@ function buildWav(pcmBuffer, sampleRate = SAMPLE_RATE, bitsPerSample = BITS_PER_
   return buf;
 }
 
-// Generate silent WAV of given duration (ms)
 function buildSilenceWav(durationMs, sampleRate = SAMPLE_RATE) {
   const numSamples = Math.floor(sampleRate * durationMs / 1000);
   const pcmBuffer = Buffer.alloc(numSamples * 2);
   return buildWav(pcmBuffer, sampleRate);
 }
 
-// Extract PCM data from WAV buffer (skip 44-byte header)
 function extractPcm(wavBuffer) {
   if (wavBuffer.slice(0, 4).toString() === 'RIFF') {
     return wavBuffer.slice(44);
@@ -96,14 +94,16 @@ function extractPcm(wavBuffer) {
 }
 
 // ── Core TTS function ──────────────────────────────────────────────────────
-async function callTTS({ text, apiKey, speed, pitch, volume }) {
+async function callTTS({ text, style, voice, apiKey, speed, pitch, volume }) {
   const endpoint = process.env.MIMO_API_ENDPOINT || 'https://api.xiaomimimo.com/v1/chat/completions';
   const model = process.env.MIMO_TTS_MODEL || 'mimo-v2-audio-tts';
 
+  const content = style ? `<style>${style}</style>${text}` : text;
+
   const body = {
     model,
-    messages: [{ role: 'assistant', content: text }],
-    audio: { format: 'wav', voice: 'mimo_default' },
+    messages: [{ role: 'assistant', content }],
+    audio: { format: 'wav', voice: voice || 'mimo_default' },
   };
 
   if (speed && speed !== 1) body.audio.speed = speed;
@@ -152,25 +152,47 @@ async function callTTS({ text, apiKey, speed, pitch, volume }) {
   return buildWav(raw);
 }
 
-// ── Multi-line with pause between segments ─────────────────────────────────
-async function callTTSWithPause({ text, apiKey, pauseMs, speed, pitch, volume }) {
-  const lines = text.split(/\n/).filter(s => s.trim().length > 0);
+// ── Split text into segments for pause insertion ───────────────────────────
+function splitIntoSegments(text) {
+  // Multi-line: split by newlines
+  const lines = text.split(/\n/).map(s => s.trim()).filter(s => s.length > 0);
+  if (lines.length > 1) return lines;
 
-  if (lines.length <= 1) {
-    return callTTS({ text, apiKey, speed, pitch, volume });
+  // Single-line: split by sentence-ending punctuation
+  const segments = [];
+  const re = /([^。！？!?；;…]*[。！？!?；;…])/g;
+  let match;
+  let lastIndex = 0;
+  while ((match = re.exec(text)) !== null) {
+    segments.push(match[1].trim());
+    lastIndex = re.lastIndex;
+  }
+  // Remaining tail
+  const tail = text.slice(lastIndex).trim();
+  if (tail) segments.push(tail);
+
+  return segments.length > 1 ? segments : [text.trim()];
+}
+
+// ── TTS with pause between segments ────────────────────────────────────────
+async function callTTSWithPause({ text, style, voice, apiKey, pauseMs, speed, pitch, volume }) {
+  const segments = splitIntoSegments(text);
+
+  if (segments.length <= 1) {
+    return callTTS({ text, style, voice, apiKey, speed, pitch, volume });
   }
 
   const silencePcm = extractPcm(buildSilenceWav(pauseMs));
   const parts = [];
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    if (!seg) continue;
 
-    const wav = await callTTS({ text: line, apiKey, speed, pitch, volume });
+    const wav = await callTTS({ text: seg, style, voice, apiKey, speed, pitch, volume });
     parts.push(extractPcm(wav));
 
-    if (i < lines.length - 1 && pauseMs > 0) {
+    if (i < segments.length - 1 && pauseMs > 0) {
       parts.push(silencePcm);
     }
   }
@@ -208,7 +230,7 @@ function convertToMp3(wavBuffer) {
   }
 }
 
-// ── Proofread endpoint (use LLM to check text before TTS) ──────────────────
+// ── Proofread endpoint ─────────────────────────────────────────────────────
 app.post('/api/proofread', async (req, res) => {
   try {
     const { text, apiKey: bodyApiKey } = req.body;
@@ -228,17 +250,22 @@ app.post('/api/proofread', async (req, res) => {
     const endpoint = process.env.MIMO_API_ENDPOINT || 'https://api.xiaomimimo.com/v1/chat/completions';
     const model = process.env.MIMO_PROOFREAD_MODEL || 'mimo-v2-pro';
 
-    const prompt = `你是一个中文文本校对专家。请检查以下文本，找出以下问题：
-1. 错别字（用字错误）
-2. 多音字误用（读音/语境不匹配）
-3. 重复字词（连续重复或无意义重复）
-4. 语句不通顺（语法错误、搭配不当）
+    const prompt = `你是一个中文文本校对助手。请对以下文本做两项检查：
+
+1. **不通顺**：找出读起来拗口、搭配不当、语法有误的字词或短语，给出修改建议。
+2. **多音字**：找出文中出现的所有多音字，标注其在当前语境下的读音，如果读音可能引起歧义则提示。
 
 要求：
 - 只返回 JSON，不要输出任何其他内容
-- JSON 格式：{"issues":[{"type":"错别字|多音字|重复|不通顺","position":"出错位置","original":"原文","suggestion":"建议修改","reason":"原因"}],"summary":"总体评价"}
-- 如果没有问题，issues 数组为空
-- 只指出明确的问题，不要过度修改
+- JSON 格式：
+{
+  "awkward":[{"position":"不通顺的位置","original":"原文","suggestion":"修改建议","reason":"原因"}],
+  "polyphonic":[{"character":"多音字","pinyin":"当前读音","context":"所在词/句","note":"说明"}],
+  "summary":"总体评价"
+}
+- 如果某类没有问题，对应数组为空
+- 不通顺：只指出明确不通顺的地方，不要过度修改
+- 多音字：列出文中所有多音字，不要遗漏
 
 待校对文本：
 ${text.trim()}`;
@@ -276,14 +303,12 @@ ${text.trim()}`;
       throw new Error('Unexpected API response: no content found');
     }
 
-    // Parse JSON from model response (may have markdown code fences)
     let result;
     try {
       const jsonStr = content.replace(/```json?\s*/g, '').replace(/```/g, '').trim();
       result = JSON.parse(jsonStr);
     } catch {
-      // Fallback: return raw text as summary
-      result = { issues: [], summary: content };
+      result = { awkward: [], polyphonic: [], summary: content };
     }
 
     return res.json({ success: true, ...result });
@@ -306,7 +331,7 @@ ${text.trim()}`;
 app.post('/api/tts', async (req, res) => {
   try {
     const {
-      text,
+      text, style, voice,
       apiKey: bodyApiKey,
       speed, pitch, volume,
       pauseMs,
@@ -334,12 +359,12 @@ app.post('/api/tts', async (req, res) => {
     try {
       if (pause > 0) {
         wavBuffer = await callTTSWithPause({
-          text: finalText, apiKey, pauseMs: pause,
+          text: finalText, style, voice, apiKey, pauseMs: pause,
           speed, pitch, volume,
         });
       } else {
         wavBuffer = await callTTS({
-          text: finalText, apiKey,
+          text: finalText, style, voice, apiKey,
           speed, pitch, volume,
         });
       }
