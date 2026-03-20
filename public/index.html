@@ -99,6 +99,30 @@
       display: flex; align-items: center; gap: 8px;
     }
     .card-title .icon { font-size: 1.2rem; }
+    .card-title.collapsible {
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 0;
+      transition: margin-bottom 0.2s;
+    }
+    .card-title.collapsible .chevron {
+      margin-left: auto;
+      font-size: 0.85rem;
+      transition: transform 0.25s;
+      color: var(--muted);
+    }
+    .card-title.collapsible.open .chevron { transform: rotate(180deg); }
+    .card-title.collapsible.open { margin-bottom: 16px; }
+    .collapsible-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.25s ease;
+      opacity: 0;
+    }
+    .collapsible-body.open {
+      max-height: 2000px;
+      opacity: 1;
+    }
 
     /* ── Form ── */
     label {
@@ -388,7 +412,7 @@
         <button class="btn btn-sm" style="width:auto; white-space:nowrap;" onclick="saveApiKey()">保存</button>
       </div>
       <div id="apiKeyStatus" style="font-size:0.78rem; margin-top:8px; color:var(--muted);">
-        API Key 仅保存在浏览器本地，不会上传到服务器
+        API Key 随请求发送到后端用于调用 API，请在可信网络环境中使用
       </div>
     </div>
 
@@ -408,7 +432,8 @@
 
     <!-- Style Selection -->
     <div class="card">
-      <div class="card-title"><span class="icon">🎨</span> 风格设置</div>
+      <div class="card-title collapsible" onclick="toggleCollapse(this)"><span class="icon">🎨</span> 风格设置 <span class="chevron">▼</span></div>
+      <div class="collapsible-body">
 
       <div class="style-section">
         <div class="style-section-title">😊 情绪</div>
@@ -496,11 +521,14 @@
         <div class="style-section-title">✏️ 自定义风格描述（可选）</div>
         <input type="text" id="customStyle" placeholder="如：语速慢 清晰 像个新闻主播，会覆盖上方选项" />
       </div>
+
+      </div><!-- /collapsible-body -->
     </div>
 
     <!-- Voice Clone -->
     <div class="card">
-      <div class="card-title"><span class="icon">🎤</span> 语音克隆（可选）</div>
+      <div class="card-title collapsible" onclick="toggleCollapse(this)"><span class="icon">🎤</span> 语音克隆（可选） <span class="chevron">▼</span></div>
+      <div class="collapsible-body">
       <div class="file-upload" id="fileUpload" onclick="document.getElementById('voiceFile').click()">
         <span class="icon">📁</span>
         <div class="info">
@@ -510,6 +538,7 @@
         <input type="file" id="voiceFile" accept=".wav" onchange="handleVoiceFile(this)" />
       </div>
       <button class="remove-btn" id="removeVoiceBtn" style="display:none; margin-top: 8px; background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.82rem;" onclick="removeVoiceFile()">✕ 移除音频</button>
+      </div><!-- /collapsible-body -->
     </div>
 
     <!-- Generate Button -->
@@ -740,6 +769,13 @@ with open("output.wav", "wb") as f:
     renderHistory();
     loadApiKey();
   });
+
+  // ── Collapsible sections ──
+  function toggleCollapse(el) {
+    const body = el.nextElementSibling;
+    el.classList.toggle('open');
+    body.classList.toggle('open');
+  }
 
   // ── Tab Switching ──
   function switchTab(tab) {

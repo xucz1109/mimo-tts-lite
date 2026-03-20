@@ -61,9 +61,13 @@ npm install
 
 ### 2. 配置 API Key
 
-启动后，在页面顶部的 **API Key 配置** 输入框中填入你的 MiMo API Key，点击「保存」即可。Key 会保存在浏览器本地（localStorage），不会上传到服务器。
+支持三种方式（优先级从高到低）：
 
-> 也可通过环境变量 `MIMO_API_KEY` 配置，或自动从 `~/.openclaw/openclaw.json` 读取（优先级：页面输入 > 环境变量 > OpenClaw 配置）
+1. **页面输入** — 启动后在页面顶部输入 API Key 并点击「保存」，Key 会暂存于浏览器 localStorage
+2. **环境变量** — 启动前设置 `MIMO_API_KEY=your_key`
+3. **OpenClaw 配置** — 自动从 `~/.openclaw/openclaw.json` 读取
+
+> ⚠️ 页面输入的 API Key 会随 TTS 请求发送到后端服务器用于调用 API。请确保在可信任的网络环境中使用。
 
 ### 3. 启动
 ```bash
@@ -192,11 +196,12 @@ with open("output.wav", "wb") as f:
 
 ```
 mimo-tts-web/
-├── server.js              # Express 后端服务
+├── server.js              # Express 后端服务（纯 Node.js，无外部依赖）
 ├── public/
 │   └── index.html         # 前端单页应用（含 API 文档）
 ├── scripts/
-│   └── tts_to_wav.sh      # MiMo TTS API 调用脚本
+│   └── tts_to_wav.sh      # 命令行 TTS 脚本（可选，需 bash/jq/curl/python3）
+├── sing0301_dict.json     # 预置歌曲歌词字典
 ├── package.json
 ├── .gitignore
 └── README.md
