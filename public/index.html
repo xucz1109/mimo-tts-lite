@@ -405,19 +405,6 @@
         <div class="chip" data-value="撒娇 夹子音">🥰 撒娇</div>
       </div>
 
-      <!-- Prosody / Tone -->
-      <span class="section-label">💬 抑扬顿挫</span>
-      <div class="chip-group" id="toneChips">
-        <div class="chip active" data-value="">自然</div>
-        <div class="chip" data-value="清晰有力">💪 清晰有力</div>
-        <div class="chip" data-value="悄悄话">🤫 悄悄话</div>
-        <div class="chip" data-value="大声喊">📢 大声喊</div>
-        <div class="chip" data-value="抑扬顿挫">🎶 抑扬顿挫</div>
-        <div class="chip" data-value="温柔低语">🫧 温柔低语</div>
-        <div class="chip" data-value="铿锵有力">⚔️ 铿锵有力</div>
-        <div class="chip" data-value="绘声绘色">🎭 绘声绘色</div>
-      </div>
-
       <!-- Custom requirements -->
       <span class="section-label">✏️ 自定义要求（与上方选项融合）</span>
       <input type="text" id="customStyle" placeholder="如：标准广播腔，抑扬顿挫，断句增加500ms" />
@@ -429,13 +416,6 @@
         <span class="icon">⚙️</span> 参数调节 <span class="chevron">▼</span>
       </div>
       <div class="collapsible-body open">
-
-      <!-- Format -->
-      <label>下载格式</label>
-      <div class="format-group">
-        <div class="format-pill active" data-fmt="wav" onclick="selectFormat(this)">WAV</div>
-        <div class="format-pill" data-fmt="mp3" onclick="selectFormat(this)">MP3</div>
-      </div>
 
       <!-- Speed -->
       <div class="slider-row">
@@ -458,14 +438,6 @@
         <span class="slider-val" id="pitchVal">0</span>
       </div>
 
-      <!-- Pause -->
-      <div class="slider-row">
-        <label>停顿</label>
-        <input type="range" id="pauseSlider" min="0" max="3000" step="100" value="300" oninput="updateSliderVal('pauseVal', this.value, 'ms')" />
-        <span class="slider-val" id="pauseVal">300ms</span>
-      </div>
-      <div style="font-size:0.7rem; color:var(--muted); margin-top:-4px;">句子/段落间停顿时长，设为 0 关闭</div>
-
       </div>
     </div>
 
@@ -478,7 +450,6 @@
   let currentFilename = 'tts_output.wav';
   let currentMimeType = 'audio/wav';
   let history = JSON.parse(localStorage.getItem('tts_history') || '[]');
-  let outputFormat = 'wav';
 
   // ── Init ──
   document.addEventListener('DOMContentLoaded', () => {
@@ -517,7 +488,7 @@
 
   // ── Chip Selection ──
   function initChips() {
-    ['voiceChips', 'emotionChips', 'toneChips'].forEach(id => {
+    ['voiceChips', 'emotionChips'].forEach(id => {
       document.getElementById(id).addEventListener('click', e => {
         const chip = e.target.closest('.chip');
         if (!chip) return;
@@ -535,7 +506,6 @@
   function buildStyle() {
     const parts = [
       getChipValue('emotionChips'),
-      getChipValue('toneChips'),
     ].filter(Boolean);
 
     const custom = document.getElementById('customStyle').value.trim();
@@ -543,15 +513,6 @@
       parts.push(custom);
     }
     return parts.join(' ');
-  }
-
-  // Parse pause override from custom style: "断句增加500ms" / "停顿800ms" etc.
-  function parsePauseOverride() {
-    const custom = document.getElementById('customStyle').value.trim();
-    if (!custom) return null;
-    const m = custom.match(/(?:断句|停顿|pause)\s*(?:增加)?(\d+)\s*(?:ms|毫秒)?/i);
-    if (m) return parseInt(m[1]);
-    return null;
   }
 
   // ── Undo / Redo ──
@@ -610,11 +571,6 @@
   }
 
   // ── Format ──
-  function selectFormat(el) {
-    document.querySelectorAll('.format-pill').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    outputFormat = el.dataset.fmt;
-  }
   function updateSliderVal(valId, value, suffix) {
     document.getElementById(valId).textContent = value + suffix;
   }
@@ -633,20 +589,15 @@
 
     const style = buildStyle();
     const voice = getChipValue('voiceChips');
-    const pauseOverride = parsePauseOverride();
-    const sliderPause = parseInt(document.getElementById('pauseSlider').value);
-    const finalPause = pauseOverride !== null ? pauseOverride : sliderPause;
 
     try {
       const body = {
         text,
         style: style || undefined,
         voice: voice || undefined,
-        format: outputFormat,
         speed: parseFloat(document.getElementById('speedSlider').value),
         pitch: parseInt(document.getElementById('pitchSlider').value),
         volume: parseInt(document.getElementById('volumeSlider').value),
-        pauseMs: finalPause,
       };
       const pageApiKey = document.getElementById('apiKeyInput').value.trim();
       if (pageApiKey) body.apiKey = pageApiKey;
@@ -692,9 +643,6 @@
         speed: parseFloat(document.getElementById('speedSlider').value),
         volume: parseInt(document.getElementById('volumeSlider').value),
         pitch: parseInt(document.getElementById('pitchSlider').value),
-        pauseMs: parseInt(document.getElementById('pauseSlider').value),
-        format: outputFormat,
-        audioBase64: data.audio,
         filename: currentFilename,
         size: data.size,
         time: new Date().toLocaleString('zh-CN'),
@@ -842,14 +790,41 @@
       </div>`;
     }).join('');
   }
-  function playHistory(index) {
+  async function playHistory(index) {
     const h = history[index];
     if (!h) return;
-    const byteChars = atob(h.audioBase64);
-    const byteArray = new Uint8Array(byteChars.length);
-    for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
-    const blob = new Blob([byteArray], { type: h.mimeType || 'audio/wav' });
-    new Audio(URL.createObjectURL(blob)).play();
+
+    showError('正在重新生成音频...');
+    
+    try {
+      const body = {
+        text: h.text,
+        style: h.style !== '默认' ? h.style : undefined,
+        voice: h.voice !== '默认' ? h.voice : undefined,
+        speed: h.speed,
+        pitch: h.pitch,
+        volume: h.volume,
+      };
+      const pageApiKey = document.getElementById('apiKeyInput').value.trim();
+      if (pageApiKey) body.apiKey = pageApiKey;
+
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+
+      const byteChars = atob(data.audio);
+      const byteArray = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([byteArray], { type: data.mimeType || 'audio/wav' });
+      new Audio(URL.createObjectURL(blob)).play();
+      errorMsg.classList.remove('show');
+    } catch (err) {
+      showError('播放失败：' + err.message);
+    }
   }
   function deleteHistory(index) {
     if (!confirm('确定删除？')) return;
