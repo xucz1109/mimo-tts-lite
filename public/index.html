@@ -72,29 +72,30 @@
     .main-layout {
       display: grid;
       grid-template-columns: 1fr 380px;
-      gap: 20px;
+      gap: 16px;
       max-width: 1400px;
       margin: 0 auto;
-      padding: 20px 24px;
+      padding: 14px 20px;
       min-height: calc(100vh - 64px);
+      max-height: calc(100vh - 64px);
     }
 
     /* ── Left Column ── */
-    .left-col { display: flex; flex-direction: column; gap: 16px; }
+    .left-col { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
 
     /* ── Right Column ── */
-    .right-col { display: flex; flex-direction: column; gap: 16px; }
+    .right-col { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
 
     /* ── Card ── */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 14px;
       box-shadow: var(--shadow);
     }
     .card-title {
-      font-size: 0.92rem; font-weight: 700; margin-bottom: 14px;
+      font-size: 0.85rem; font-weight: 700; margin-bottom: 10px;
       display: flex; align-items: center; gap: 8px;
       color: var(--text);
     }
@@ -133,8 +134,8 @@
     }
 
     /* Result section */
-    .result-section { padding: 20px; border-bottom: 1px solid var(--border); }
-    .result-section .card-title { margin-bottom: 12px; }
+    .result-section { padding: 14px; border-bottom: 1px solid var(--border); }
+    .result-section .card-title { margin-bottom: 8px; }
     .audio-player {
       width: 100%;
       margin: 8px 0;
@@ -154,9 +155,9 @@
     }
 
     /* History section */
-    .history-section { padding: 16px 20px; }
-    .history-section .card-title { margin-bottom: 10px; font-size: 0.85rem; }
-    .history-list { max-height: 200px; overflow-y: auto; }
+    .history-section { padding: 12px 14px; }
+    .history-section .card-title { margin-bottom: 8px; font-size: 0.82rem; }
+    .history-list { max-height: 140px; overflow-y: auto; }
     .history-list::-webkit-scrollbar { width: 4px; }
     .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     .history-item {
@@ -198,7 +199,7 @@
     textarea {
       width: 100%;
       flex: 1;
-      min-height: 200px;
+      min-height: 120px;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -273,7 +274,7 @@
     input::placeholder { color: #b0b3c5; }
 
     /* ── Chip Selection ── */
-    .style-section { margin-bottom: 12px; }
+    .style-section { margin-bottom: 8px; }
     .style-section-title {
       font-size: 0.78rem; font-weight: 600; color: var(--muted);
       margin-bottom: 6px; display: flex; align-items: center; gap: 4px;
@@ -603,7 +604,6 @@
     <div class="header-badges">
       <span class="header-badge">mimo-v2-audio-tts</span>
       <span class="header-badge">24kHz WAV</span>
-      <span class="header-badge">语音克隆</span>
     </div>
   </div>
   <div class="header-right">
@@ -640,7 +640,7 @@
         </div>
         <div class="loading" id="loading">
           <div class="spinner"></div>
-          <p>正在生成语音，请稍候…</p>
+          <p id="loadingText">正在生成语音，请稍候…</p>
         </div>
         <div class="error" id="errorMsg"></div>
       </div>
@@ -696,7 +696,7 @@
           </div>
         </div>
 
-        <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…&#10;&#10;💡 多角色模式：在每行开头用 [标签] 指定音色&#10;[男声][愤怒]你竟敢背叛我！&#10;[女声][温柔]没关系，我原谅你。&#10;[鸣人][快速]我要成为火影！" style="flex:1; min-height:180px;"></textarea>
+        <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…&#10;&#10;💡 多角色模式：在每行开头用 [标签] 指定音色&#10;[男声][愤怒]你竟敢背叛我！&#10;[女声][温柔]没关系，我原谅你。&#10;[鸣人][快速]我要成为火影！" style="flex:1; min-height:100px;"></textarea>
         <div class="char-count"><span id="charCount">0</span> / 10000</div>
         <div class="line-preview" id="linePreview"></div>
         <div class="generate-bar">
@@ -706,9 +706,13 @@
           <button class="btn btn-outline" id="previewBtn" onclick="generate(true)" style="white-space:nowrap;">
             🎧 试听
           </button>
-          <button class="btn btn-outline" id="undoBtn" onclick="undoText()" title="撤销文本修改" style="white-space:nowrap; padding:12px 16px; position:relative;">
-            ↩️ 撤销
+          <button class="btn btn-outline" id="undoBtn" onclick="undoText()" title="撤销" style="white-space:nowrap; padding:12px 14px; position:relative;">
+            ↩️
             <span id="undoCount" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--accent); color:#fff; font-size:0.6rem; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700;"></span>
+          </button>
+          <button class="btn btn-outline" id="redoBtn" onclick="redoText()" title="恢复" style="white-space:nowrap; padding:12px 14px; position:relative;">
+            ↪️
+            <span id="redoCount" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--accent); color:#fff; font-size:0.6rem; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700;"></span>
           </button>
         </div>
       </div>
@@ -892,7 +896,10 @@
 
     <!-- Advanced Settings -->
     <div class="card">
-      <div class="card-title"><span class="icon">⚙️</span> 参数调节</div>
+      <div class="card-title collapsible open" onclick="toggleCollapse(this)">
+        <span class="icon">⚙️</span> 参数调节 <span class="chevron">▼</span>
+      </div>
+      <div class="collapsible-body open">
 
       <!-- Preview mode -->
       <div class="toggle-row">
@@ -945,23 +952,7 @@
         <button class="slider-insert-btn" onclick="insertSliderTag('pause')" title="插入到文本">＋</button>
       </div>
       <div style="font-size:0.7rem; color:var(--muted); margin-top:-4px;">点击 ＋ 插入到文本光标处，或作为段落间停顿</div>
-    </div>
 
-    <!-- Voice Clone -->
-    <div class="card">
-      <div class="card-title collapsible" onclick="toggleCollapse(this)">
-        <span class="icon">🎤</span> 语音克隆 <span class="chevron">▼</span>
-      </div>
-      <div class="collapsible-body">
-        <div class="file-upload" onclick="document.getElementById('voiceFile').click()">
-          <span class="icon">📁</span>
-          <div class="info">
-            <div class="name" id="fileName">点击上传音频</div>
-            <div class="hint">WAV · 24kHz · 5~15 秒</div>
-          </div>
-          <input type="file" id="voiceFile" accept=".wav" onchange="handleVoiceFile(this)" />
-        </div>
-        <button id="removeVoiceBtn" style="display:none; margin-top:6px; background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.78rem;" onclick="removeVoiceFile()">✕ 移除音频</button>
       </div>
     </div>
 
@@ -1087,7 +1078,6 @@ with open("output.wav", "wb") as f:
   let autoNormalize = true;
   let previewMode = false;
   let outputFormat = 'wav';
-  let voiceFileBase64 = null;
   let isSinging = false;
 
   // ── Init ──
@@ -1097,6 +1087,7 @@ with open("output.wav", "wb") as f:
     renderCustomTags();
     renderHistory();
     loadApiKey();
+    updateUndoRedoBtn();
   });
 
   // ── Collapsible ──
@@ -1135,38 +1126,65 @@ with open("output.wav", "wb") as f:
     else { input.type = 'password'; icon.textContent = '👁️'; }
   }
 
-  // ── Undo Stack ──
+  // ── Undo / Redo Stack ──
   let undoStack = [];
+  let redoStack = [];
 
   function saveUndo() {
     const val = textInput.value;
-    // Don't save duplicates
     if (undoStack.length > 0 && undoStack[undoStack.length - 1] === val) return;
     undoStack.push(val);
     if (undoStack.length > 50) undoStack.shift();
-    updateUndoBtn();
+    redoStack = []; // clear redo on new action
+    updateUndoRedoBtn();
   }
 
   function undoText() {
     if (undoStack.length === 0) return;
+    const current = textInput.value;
+    redoStack.push(current);
     const prev = undoStack.pop();
     textInput.value = prev;
     charCount.textContent = prev.length;
     updateLinePreview(prev);
     textInput.focus();
-    updateUndoBtn();
+    updateUndoRedoBtn();
   }
 
-  function updateUndoBtn() {
-    const btn = document.getElementById('undoBtn');
-    const badge = document.getElementById('undoCount');
+  function redoText() {
+    if (redoStack.length === 0) return;
+    const current = textInput.value;
+    undoStack.push(current);
+    const next = redoStack.pop();
+    textInput.value = next;
+    charCount.textContent = next.length;
+    updateLinePreview(next);
+    textInput.focus();
+    updateUndoRedoBtn();
+  }
+
+  function updateUndoRedoBtn() {
+    const uBtn = document.getElementById('undoBtn');
+    const uBadge = document.getElementById('undoCount');
+    const rBtn = document.getElementById('redoBtn');
+    const rBadge = document.getElementById('redoCount');
+
     if (undoStack.length > 0) {
-      btn.style.opacity = '1';
-      badge.style.display = 'flex';
-      badge.textContent = undoStack.length;
+      uBtn.style.opacity = '1';
+      uBadge.style.display = 'flex';
+      uBadge.textContent = undoStack.length;
     } else {
-      btn.style.opacity = '0.4';
-      badge.style.display = 'none';
+      uBtn.style.opacity = '0.4';
+      uBadge.style.display = 'none';
+    }
+
+    if (redoStack.length > 0) {
+      rBtn.style.opacity = '1';
+      rBadge.style.display = 'flex';
+      rBadge.textContent = redoStack.length;
+    } else {
+      rBtn.style.opacity = '0.4';
+      rBadge.style.display = 'none';
     }
   }
 
@@ -1374,23 +1392,6 @@ with open("output.wav", "wb") as f:
     document.getElementById(valId).textContent = value + suffix;
   }
 
-  // ── Voice File ──
-  function handleVoiceFile(input) {
-    const file = input.files[0];
-    if (!file) return;
-    document.getElementById('fileName').textContent = file.name;
-    document.getElementById('removeVoiceBtn').style.display = 'inline-block';
-    const reader = new FileReader();
-    reader.onload = () => { voiceFileBase64 = reader.result.split(',')[1]; };
-    reader.readAsDataURL(file);
-  }
-  function removeVoiceFile() {
-    voiceFileBase64 = null;
-    document.getElementById('voiceFile').value = '';
-    document.getElementById('fileName').textContent = '点击上传音频';
-    document.getElementById('removeVoiceBtn').style.display = 'none';
-  }
-
   // ── Build Style ──
   function buildStyle() {
     const custom = document.getElementById('customStyle').value.trim();
@@ -1512,7 +1513,8 @@ with open("output.wav", "wb") as f:
       if (lastSaved !== textInput.value) {
         undoStack.push(textInput.value);
         if (undoStack.length > 50) undoStack.shift();
-        updateUndoBtn();
+        redoStack = []; // clear redo on new edit
+        updateUndoRedoBtn();
       }
       undoSaveNeeded = false;
     }
@@ -1543,18 +1545,6 @@ with open("output.wav", "wb") as f:
       text = singText ? 'LYRICS:' + singText : songVal;
     }
 
-    const body = {
-      text,
-      style: style || undefined,
-      format: outputFormat,
-      speed: parseFloat(document.getElementById('speedSlider').value),
-      pitch: parseInt(document.getElementById('pitchSlider').value),
-      volume: parseInt(document.getElementById('volumeSlider').value),
-      pauseMs: parseInt(document.getElementById('pauseSlider').value),
-    };
-    const pageApiKey = document.getElementById('apiKeyInput').value.trim();
-    if (pageApiKey) body.apiKey = pageApiKey;
-
     const btn = isPreview ? document.getElementById('previewBtn') : generateBtn;
     btn.disabled = true;
     loadingEl.classList.add('show');
@@ -1562,34 +1552,140 @@ with open("output.wav", "wb") as f:
     document.getElementById('resultEmpty').style.display = 'none';
     errorMsg.classList.remove('show');
     const startTime = Date.now();
+    const loadingText = document.getElementById('loadingText');
+
+    // Detect multi-role lines
+    const lines = text.split('\n').filter(l => l.trim().length > 0);
+    const taggedLines = lines.filter(l => /^\s*\[/.test(l));
+    const isMultiRole = taggedLines.length > 1;
 
     try {
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+      let audioBase64, totalSize, outExt, outMime;
 
-      const byteChars = atob(data.audio);
+      if (isMultiRole && !isSinging) {
+        // ── Line-by-line with progress ──
+        const pcmParts = [];
+        const pause = Math.max(0, Math.min(5000, parseInt(document.getElementById('pauseSlider').value) || 0));
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          // Parse tags from this line
+          const lineTags = [];
+          let rest = line;
+          const re = /^\[([^\]]+)\]\s*/;
+          let m;
+          while ((m = rest.match(re))) {
+            lineTags.push(m[1].trim());
+            rest = rest.slice(m[0].length);
+          }
+          const lineText = rest.trim() || line;
+          const lineStyle = lineTags.length > 0 ? lineTags.join(' ') : style;
+
+          // Show progress
+          const tagDisplay = lineTags.length > 0 ? lineTags.map(t => `[${t}]`).join('') : '';
+          const preview = lineText.length > 20 ? lineText.slice(0, 20) + '…' : lineText;
+          loadingText.textContent = `正在生成：${tagDisplay}${preview} (${i + 1}/${lines.length})`;
+
+          const body = {
+            text: lineText,
+            style: lineStyle || undefined,
+            format: 'wav',
+            speed: parseFloat(document.getElementById('speedSlider').value),
+            pitch: parseInt(document.getElementById('pitchSlider').value),
+            volume: parseInt(document.getElementById('volumeSlider').value),
+            pauseMs: 0,
+          };
+          const pageApiKey = document.getElementById('apiKeyInput').value.trim();
+          if (pageApiKey) body.apiKey = pageApiKey;
+
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 300000);
+          const res = await fetch('/api/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+          const data = await res.json();
+          if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+
+          // Decode WAV to PCM
+          const wavBuf = base64ToUint8(data.audio);
+          const pcm = extractPcmClient(wavBuf);
+          pcmParts.push(pcm);
+
+          // Add silence gap between lines
+          if (i < lines.length - 1 && pause > 0) {
+            const silenceSamples = Math.floor(24000 * pause / 1000);
+            pcmParts.push(new Uint8Array(silenceSamples * 2));
+          }
+        }
+
+        // Combine PCM into WAV
+        loadingText.textContent = '正在合并音频…';
+        const combinedPcm = concatUint8(pcmParts);
+        const wavBuffer = buildWavClient(combinedPcm, 24000, 16, 1);
+
+        outExt = outputFormat;
+        outMime = outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/wav';
+        totalSize = wavBuffer.length;
+        audioBase64 = uint8ToBase64(wavBuffer);
+
+      } else {
+        // ── Single request (original flow) ──
+        loadingText.textContent = '正在生成语音，请稍候…';
+
+        const body = {
+          text,
+          style: style || undefined,
+          format: outputFormat,
+          speed: parseFloat(document.getElementById('speedSlider').value),
+          pitch: parseInt(document.getElementById('pitchSlider').value),
+          volume: parseInt(document.getElementById('volumeSlider').value),
+          pauseMs: parseInt(document.getElementById('pauseSlider').value),
+        };
+        const pageApiKey = document.getElementById('apiKeyInput').value.trim();
+        if (pageApiKey) body.apiKey = pageApiKey;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 300000);
+        const res = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+
+        audioBase64 = data.audio;
+        totalSize = data.size;
+        outExt = data.format || 'wav';
+        outMime = data.mimeType || 'audio/wav';
+      }
+
+      // ── Play result ──
+      const byteChars = atob(audioBase64);
       const byteArray = new Uint8Array(byteChars.length);
       for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
 
-      const mime = data.mimeType || 'audio/wav';
-      const blob = new Blob([byteArray], { type: mime });
-      currentMimeType = mime;
+      const blob = new Blob([byteArray], { type: outMime });
+      currentMimeType = outMime;
 
       if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
       currentBlobUrl = URL.createObjectURL(blob);
-      currentFilename = data.filename || `tts_output.${data.format || 'wav'}`;
+      currentFilename = `tts_output.${outExt}`;
 
       const audioPlayer = document.getElementById('audioPlayer');
       audioPlayer.src = currentBlobUrl;
       audioPlayer.play().catch(() => {});
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      document.getElementById('metaSize').textContent = `📏 ${(data.size / 1024).toFixed(1)} KB`;
+      document.getElementById('metaSize').textContent = `📏 ${(totalSize / 1024).toFixed(1)} KB`;
       document.getElementById('metaTime').textContent = `⏱️ ${elapsed}s`;
       document.getElementById('metaStyle').textContent = usePreview ? '🎧 试听' : (style ? `🎨 ${style}` : '🎨 默认');
 
@@ -1603,19 +1699,70 @@ with open("output.wav", "wb") as f:
         pitch: parseInt(document.getElementById('pitchSlider').value),
         pauseMs: parseInt(document.getElementById('pauseSlider').value),
         format: outputFormat,
-        audioBase64: data.audio,
+        audioBase64: audioBase64,
         filename: currentFilename,
-        size: data.size,
+        size: totalSize,
         time: new Date().toLocaleString('zh-CN'),
-        mimeType: mime,
+        mimeType: outMime,
       });
     } catch (err) {
-      showError(err.message);
+      const msg = err.name === 'AbortError' ? '请求超时（5分钟），请稍后重试' : err.message;
+      showError(msg);
       document.getElementById('resultEmpty').style.display = 'block';
     } finally {
       btn.disabled = false;
       loadingEl.classList.remove('show');
+      loadingText.textContent = '正在生成语音，请稍候…';
     }
+  }
+
+  // ── Client-side WAV/PCM helpers ──
+  function base64ToUint8(b64) {
+    const chars = atob(b64);
+    const arr = new Uint8Array(chars.length);
+    for (let i = 0; i < chars.length; i++) arr[i] = chars.charCodeAt(i);
+    return arr;
+  }
+  function uint8ToBase64(arr) {
+    let binary = '';
+    for (let i = 0; i < arr.length; i++) binary += String.fromCharCode(arr[i]);
+    return btoa(binary);
+  }
+  function extractPcmClient(wavBuf) {
+    if (wavBuf.length > 44 && String.fromCharCode(...wavBuf.slice(0,4)) === 'RIFF') {
+      return wavBuf.slice(44);
+    }
+    return wavBuf;
+  }
+  function concatUint8(parts) {
+    let total = 0;
+    for (const p of parts) total += p.length;
+    const result = new Uint8Array(total);
+    let offset = 0;
+    for (const p of parts) { result.set(p, offset); offset += p.length; }
+    return result;
+  }
+  function buildWavClient(pcmBuf, sampleRate, bitsPerSample, channels) {
+    const byteRate = sampleRate * channels * bitsPerSample / 8;
+    const blockAlign = channels * bitsPerSample / 8;
+    const dataSize = pcmBuf.length;
+    const buf = new Uint8Array(44 + dataSize);
+    const view = new DataView(buf.buffer);
+    buf.set([82,73,70,70], 0); // 'RIFF'
+    view.setUint32(4, 36 + dataSize, true);
+    buf.set([87,65,86,69], 8); // 'WAVE'
+    buf.set([102,109,116,32], 12); // 'fmt '
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, channels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    buf.set([100,97,116,97], 36); // 'data'
+    view.setUint32(40, dataSize, true);
+    buf.set(pcmBuf, 44);
+    return buf;
   }
 
   // ── Playback ──
@@ -1718,6 +1865,16 @@ with open("output.wav", "wb") as f:
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
       generate();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      // Ctrl+Z = undo (prevent default browser undo to use our stack)
+      e.preventDefault();
+      undoText();
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+      // Ctrl+Y or Ctrl+Shift+Z = redo
+      e.preventDefault();
+      redoText();
     }
   });
 </script>
