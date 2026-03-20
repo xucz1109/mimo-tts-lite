@@ -1,7 +1,7 @@
 {
-  "name": "mimo-tts-web",
+  "name": "mimo-tts-lite",
   "version": "1.0.0",
-  "description": "Web interface for MiMo v2 Text-to-Speech — generate speech from text, play and download WAV files.",
+  "description": "Lightweight web interface for MiMo v2 Text-to-Speech.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MiMo TTS — 文字转语音</title>
+  <title>MiMo TTS Lite — 文字转语音</title>
   <style>
     :root {
       --bg: #f5f6fa;
@@ -52,38 +52,20 @@
       background: rgba(255,255,255,0.2);
       backdrop-filter: blur(4px);
     }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .header-btn {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: #fff;
-      font-size: 0.82rem;
-      font-weight: 600;
-      padding: 6px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      backdrop-filter: blur(4px);
-    }
-    .header-btn:hover { background: rgba(255,255,255,0.35); }
-    .header-btn.active { background: #fff; color: var(--accent); }
 
     /* ── Main Layout ── */
     .main-layout {
       display: grid;
-      grid-template-columns: 1fr 380px;
+      grid-template-columns: 1fr 340px;
       gap: 16px;
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 14px 20px;
       min-height: calc(100vh - 64px);
       max-height: calc(100vh - 64px);
     }
 
-    /* ── Left Column ── */
     .left-col { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
-
-    /* ── Right Column ── */
     .right-col { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
 
     /* ── Card ── */
@@ -124,7 +106,7 @@
     }
     .collapsible-body.open { max-height: 2000px; opacity: 1; }
 
-    /* ── Result / History Area (top-left) ── */
+    /* ── Result & History ── */
     .result-history-area {
       background: var(--card);
       border: 1px solid var(--border);
@@ -132,8 +114,6 @@
       box-shadow: var(--shadow);
       overflow: hidden;
     }
-
-    /* Result section */
     .result-section { padding: 14px; border-bottom: 1px solid var(--border); }
     .result-section .card-title { margin-bottom: 8px; }
     .audio-player {
@@ -154,7 +134,6 @@
       font-size: 0.76rem; color: var(--muted);
     }
 
-    /* History section */
     .history-section { padding: 12px 14px; }
     .history-section .card-title { margin-bottom: 8px; font-size: 0.82rem; }
     .history-list { max-height: 140px; overflow-y: auto; }
@@ -175,7 +154,6 @@
       flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       color: var(--text);
     }
-    .history-item .hist-style { font-size: 0.72rem; color: var(--accent2); }
     .history-item .hist-time { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
     .history-item .hist-play {
       background: none; border: none; color: var(--accent);
@@ -193,7 +171,7 @@
       text-align: center; margin-top: 8px;
     }
 
-    /* ── Text Input Area ── */
+    /* ── Text Input ── */
     .text-area-card { flex: 1; display: flex; flex-direction: column; }
     .text-area-card .card { flex: 1; display: flex; flex-direction: column; }
     textarea {
@@ -273,66 +251,6 @@
     }
     input::placeholder { color: #b0b3c5; }
 
-    /* ── Chip Selection ── */
-    .style-section { margin-bottom: 8px; }
-    .style-section-title {
-      font-size: 0.78rem; font-weight: 600; color: var(--muted);
-      margin-bottom: 6px; display: flex; align-items: center; gap: 4px;
-    }
-    .chip-group { display: flex; flex-wrap: wrap; gap: 5px; }
-
-    /* ── Role Preset Cards ── */
-    .preset-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
-    .preset-card {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 2px;
-      padding: 8px 4px;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.15s;
-      user-select: none;
-      text-align: center;
-    }
-    .preset-card:hover {
-      border-color: var(--accent);
-      background: var(--accent-light);
-      transform: translateY(-1px);
-    }
-    .preset-card.active {
-      border-color: var(--accent);
-      background: var(--accent);
-      box-shadow: 0 2px 8px rgba(108,92,231,0.25);
-    }
-    .preset-card.active .preset-name { color: #fff; }
-    .preset-card.active .preset-icon { filter: brightness(1.2); }
-    .preset-icon { font-size: 1.2rem; line-height: 1; }
-    .preset-name { font-size: 0.68rem; color: var(--muted); font-weight: 600; line-height: 1.2; }
-
-    .chip {
-      padding: 5px 12px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      font-size: 0.78rem;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.15s;
-      user-select: none;
-    }
-    .chip:hover { border-color: var(--accent); color: var(--text); }
-    .chip.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(108,92,231,0.2);
-    }
-
     /* ── Slider ── */
     .slider-row {
       display: flex; align-items: center; gap: 8px;
@@ -358,25 +276,6 @@
     .slider-val {
       min-width: 42px; text-align: right; font-size: 0.78rem; color: var(--accent);
       font-variant-numeric: tabular-nums; flex-shrink: 0;
-    }
-    .slider-insert-btn {
-      width: 24px; height: 24px;
-      background: var(--accent-light);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--accent);
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.15s;
-      padding: 0;
-    }
-    .slider-insert-btn:hover {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
     }
 
     /* ── Toggle Switch ── */
@@ -411,23 +310,6 @@
       background: var(--accent); border-color: var(--accent); color: #fff;
     }
 
-    /* ── Voice Clone ── */
-    .file-upload {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 14px;
-      background: var(--bg);
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .file-upload:hover { border-color: var(--accent); }
-    .file-upload input { display: none; }
-    .file-upload .icon { font-size: 1.3rem; }
-    .file-upload .info { flex: 1; }
-    .file-upload .name { font-size: 0.82rem; color: var(--text); }
-    .file-upload .hint { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
-
     /* ── API Key ── */
     .api-key-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
     .api-key-row input { flex: 1; }
@@ -446,6 +328,59 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading p { color: var(--muted); font-size: 0.85rem; }
 
+    /* ── Proofread Results ── */
+    .pr-summary {
+      padding: 8px 12px;
+      background: var(--accent-light);
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    .pr-pass {
+      text-align: center;
+      padding: 16px;
+      color: var(--success);
+      font-size: 0.88rem;
+    }
+    .pr-item {
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    .pr-item-type {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pr-type-错别字 { background: #fde8e8; color: #c0392b; }
+    .pr-type-多音字 { background: #fef3e2; color: #e67e22; }
+    .pr-type-重复 { background: #e8f8f5; color: #1abc9c; }
+    .pr-type-不通顺 { background: #ebf5fb; color: #2980b9; }
+    .pr-original {
+      font-size: 0.82rem; color: var(--text); margin: 3px 0;
+    }
+    .pr-original del {
+      background: #fde8e8; color: #c0392b; text-decoration: line-through;
+      padding: 0 3px; border-radius: 3px;
+    }
+    .pr-suggestion {
+      font-size: 0.82rem; color: var(--success); margin: 2px 0;
+    }
+    .pr-suggestion ins {
+      background: #e8f8f5; text-decoration: none;
+      padding: 0 3px; border-radius: 3px; font-weight: 600;
+    }
+    .pr-reason {
+      font-size: 0.74rem; color: var(--muted); margin-top: 2px;
+    }
+
     /* ── Error ── */
     .error {
       display: none;
@@ -458,97 +393,6 @@
       margin-top: 10px;
     }
     .error.show { display: block; }
-
-    /* ── Role Tags (quick insert) ── */
-    .role-tag {
-      display: inline-block;
-      padding: 3px 10px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      font-size: 0.72rem;
-      color: var(--accent);
-      cursor: pointer;
-      transition: all 0.15s;
-      user-select: none;
-    }
-    .role-tag:hover {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    /* ── Quick Tags (preset & custom) ── */
-    .chip.qt {
-      font-size: 0.76rem;
-      padding: 4px 10px;
-    }
-    .chip.qt:hover { border-color: var(--accent); color: var(--accent); }
-    .custom-tag-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
-      background: var(--accent-light);
-      border: 1px solid var(--accent);
-      border-radius: 16px;
-      font-size: 0.76rem;
-      color: var(--accent);
-      cursor: pointer;
-      transition: all 0.15s;
-      user-select: none;
-    }
-    .custom-tag-chip:hover { background: var(--accent); color: #fff; }
-    .custom-tag-chip .ct-del {
-      display: inline-block;
-      width: 14px; height: 14px;
-      line-height: 14px;
-      text-align: center;
-      font-size: 0.65rem;
-      background: rgba(0,0,0,0.1);
-      border-radius: 50%;
-      cursor: pointer;
-      margin-left: 2px;
-    }
-    .custom-tag-chip .ct-del:hover { background: var(--danger); color: #fff; }
-
-    /* ── Line Preview ── */
-    .line-preview {
-      margin-top: 6px;
-      font-size: 0.74rem;
-      color: var(--muted);
-      max-height: 120px;
-      overflow-y: auto;
-      display: none;
-    }
-    .line-preview.show { display: block; }
-    .line-preview-item {
-      display: flex; align-items: center; gap: 6px;
-      padding: 3px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .line-preview-item:last-child { border-bottom: none; }
-    .line-preview-tag {
-      display: inline-block;
-      padding: 1px 6px;
-      background: var(--accent-light);
-      border-radius: 8px;
-      font-size: 0.68rem;
-      color: var(--accent);
-      white-space: nowrap;
-    }
-    .line-preview-text {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    /* ── Sing Panel ── */
-    #singPanel { display: none; margin-top: 10px; }
-    #singPanel textarea {
-      min-height: 70px; resize: vertical; margin-top: 6px;
-    }
 
     /* ── API Docs Overlay ── */
     .docs-overlay {
@@ -634,15 +478,11 @@
 <!-- ══════════ Header ══════════ -->
 <div class="header">
   <div class="header-left">
-    <div class="header-logo">🎙️ MiMo TTS</div>
+    <div class="header-logo">🎙️ MiMo TTS Lite</div>
     <div class="header-badges">
       <span class="header-badge">mimo-v2-audio-tts</span>
       <span class="header-badge">24kHz WAV</span>
     </div>
-  </div>
-  <div class="header-right">
-    <button class="header-btn active" id="btnTTS" onclick="showMain()">🎤 语音合成</button>
-    <button class="header-btn" id="btnDocs" onclick="toggleDocs()">📖 API 文档</button>
   </div>
 </div>
 
@@ -669,7 +509,6 @@
           <div class="meta-info">
             <span id="metaSize"></span>
             <span id="metaTime"></span>
-            <span id="metaStyle"></span>
           </div>
         </div>
         <div class="loading" id="loading">
@@ -693,63 +532,35 @@
     <!-- Text Input -->
     <div class="text-area-card">
       <div class="card" style="flex:1; display:flex; flex-direction:column;">
-        <div class="card-title"><span class="icon">📝</span> 输入文本
-          <span style="margin-left:auto; font-size:0.72rem; font-weight:400; color:var(--muted); cursor:pointer;" onclick="toggleRoleTip()">💡 多角色模式</span>
-        </div>
-
-        <!-- Multi-role tip -->
-        <div id="roleTip" style="display:none; background:var(--accent-light); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; font-size:0.78rem; color:var(--text); line-height:1.7;">
-          <div style="font-weight:700; margin-bottom:4px;">🎭 多角色语音模式</div>
-          在每行开头用 <code style="background:var(--bg); padding:1px 5px; border-radius:3px; color:var(--accent);">[标签]</code> 指定该行的音色/风格，支持多个叠加：<br>
-          <div style="margin:6px 0; padding:6px 10px; background:var(--card); border-radius:6px; font-family:monospace; font-size:0.76rem;">
-            [男声][愤怒]你竟敢背叛我！<br>
-            [女声][温柔]没关系，我原谅你。<br>
-            [鸣人][快速]我要成为火影！
-          </div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--muted);">
-            标签自动作为该行的 style 参数，无标签的行使用右侧全局风格设置
-          </div>
-          <!-- Quick insert tags -->
-          <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:4px;">
-            <span class="role-tag" onclick="insertTag('[男声]')">男声</span>
-            <span class="role-tag" onclick="insertTag('[女声]')">女声</span>
-            <span class="role-tag" onclick="insertTag('[童声]')">童声</span>
-            <span class="role-tag" onclick="insertTag('[温柔]')">温柔</span>
-            <span class="role-tag" onclick="insertTag('[愤怒]')">愤怒</span>
-            <span class="role-tag" onclick="insertTag('[开心]')">开心</span>
-            <span class="role-tag" onclick="insertTag('[悲伤]')">悲伤</span>
-            <span class="role-tag" onclick="insertTag('[快速]')">快速</span>
-            <span class="role-tag" onclick="insertTag('[慢速]')">慢速</span>
-            <span class="role-tag" onclick="insertTag('[东北话]')">东北话</span>
-            <span class="role-tag" onclick="insertTag('[四川话]')">四川话</span>
-            <span class="role-tag" onclick="insertTag('[粤语]')">粤语</span>
-            <span class="role-tag" onclick="insertTag('[像个新闻主播]')">新闻主播</span>
-            <span class="role-tag" onclick="insertTag('[像个老师]')">老师</span>
-            <span class="role-tag" onclick="insertTag('[大声喊]')">大声喊</span>
-            <span class="role-tag" onclick="insertTag('[悄悄话]')">悄悄话</span>
-          </div>
-        </div>
-
-        <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…&#10;&#10;💡 多角色模式：在每行开头用 [标签] 指定音色&#10;[男声][愤怒]你竟敢背叛我！&#10;[女声][温柔]没关系，我原谅你。&#10;[鸣人][快速]我要成为火影！" style="flex:1; min-height:100px;"></textarea>
+        <div class="card-title"><span class="icon">📝</span> 输入文本</div>
+        <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…" style="flex:1; min-height:100px;"></textarea>
         <div class="char-count"><span id="charCount">0</span> / 10000</div>
-        <div class="line-preview" id="linePreview"></div>
         <div class="generate-bar">
           <button class="btn btn-full" id="generateBtn" onclick="generate()">
             🎵 生成语音 <span style="font-size:0.76rem; font-weight:400; opacity:0.8;">Ctrl+Enter</span>
           </button>
-          <button class="btn btn-outline" id="previewBtn" onclick="generate(true)" style="white-space:nowrap;">
-            🎧 试听
-          </button>
-          <button class="btn btn-outline" id="undoBtn" onclick="undoText()" title="撤销" style="white-space:nowrap; padding:12px 14px; position:relative;">
+          <button class="btn btn-outline" id="undoBtn" onclick="undoText()" title="撤销" style="white-space:nowrap; padding:12px 14px;">
             ↩️
-            <span id="undoCount" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--accent); color:#fff; font-size:0.6rem; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700;"></span>
           </button>
-          <button class="btn btn-outline" id="redoBtn" onclick="redoText()" title="恢复" style="white-space:nowrap; padding:12px 14px; position:relative;">
+          <button class="btn btn-outline" id="redoBtn" onclick="redoText()" title="恢复" style="white-space:nowrap; padding:12px 14px;">
             ↪️
-            <span id="redoCount" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--accent); color:#fff; font-size:0.6rem; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700;"></span>
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Proofread Card -->
+    <div class="card" id="proofreadCard">
+      <div class="card-title"><span class="icon">🔍</span> 文本校验</div>
+      <button class="btn btn-outline btn-full" id="proofreadBtn" onclick="proofread()" style="margin-bottom:10px;">
+        🔍 校验文本（错别字 / 多音字 / 重复 / 不通顺）
+      </button>
+      <div id="proofreadLoading" style="display:none; text-align:center; padding:12px;">
+        <div class="spinner" style="width:20px; height:20px; border-width:2px;"></div>
+        <p style="color:var(--muted); font-size:0.78rem; margin-top:4px;">正在校验中…</p>
+      </div>
+      <div id="proofreadResult" style="display:none;"></div>
+      <div id="proofreadError" class="error"></div>
     </div>
 
   </div>
@@ -770,260 +581,12 @@
       <div class="api-key-status" id="apiKeyStatus">API Key 随请求发送到后端调用 API</div>
     </div>
 
-    <!-- Voice / Style Settings -->
-    <div class="card">
-      <div class="card-title"><span class="icon">🎨</span> 音色与风格</div>
-
-      <!-- Role Presets -->
-      <div class="style-section" id="rolePresetSection">
-        <div class="style-section-title">🎭 角色预设
-          <span style="margin-left:auto; font-size:0.68rem; color:var(--muted); font-weight:400;">选择预设自动配置下方参数</span>
-        </div>
-        <div class="preset-grid" id="rolePresetGrid">
-          <div class="preset-card active" data-preset="" onclick="selectPreset(this)">
-            <span class="preset-icon">🔊</span>
-            <span class="preset-name">默认</span>
-          </div>
-          <div class="preset-card" data-preset="wukong" onclick="selectPreset(this)">
-            <span class="preset-icon">🐵</span>
-            <span class="preset-name">孙悟空</span>
-          </div>
-          <div class="preset-card" data-preset="news_anchor" onclick="selectPreset(this)">
-            <span class="preset-icon">📺</span>
-            <span class="preset-name">新闻主播</span>
-          </div>
-          <div class="preset-card" data-preset="teacher" onclick="selectPreset(this)">
-            <span class="preset-icon">📚</span>
-            <span class="preset-name">温柔老师</span>
-          </div>
-          <div class="preset-card" data-preset="general" onclick="selectPreset(this)">
-            <span class="preset-icon">⚔️</span>
-            <span class="preset-name">威武将军</span>
-          </div>
-          <div class="preset-card" data-preset="child" onclick="selectPreset(this)">
-            <span class="preset-icon">🧒</span>
-            <span class="preset-name">可爱小孩</span>
-          </div>
-          <div class="preset-card" data-preset="dongbei" onclick="selectPreset(this)">
-            <span class="preset-icon">🌲</span>
-            <span class="preset-name">东北大哥</span>
-          </div>
-          <div class="preset-card" data-preset="sichuan" onclick="selectPreset(this)">
-            <span class="preset-icon">🌶️</span>
-            <span class="preset-name">四川妹子</span>
-          </div>
-          <div class="preset-card" data-preset="cantonese" onclick="selectPreset(this)">
-            <span class="preset-icon">🥟</span>
-            <span class="preset-name">广东靓仔</span>
-          </div>
-          <div class="preset-card" data-preset="taiwan" onclick="selectPreset(this)">
-            <span class="preset-icon">🧋</span>
-            <span class="preset-name">台湾甜妹</span>
-          </div>
-          <div class="preset-card" data-preset="whisper" onclick="selectPreset(this)">
-            <span class="preset-icon">🤫</span>
-            <span class="preset-name">温柔低语</span>
-          </div>
-          <div class="preset-card" data-preset="lover" onclick="selectPreset(this)">
-            <span class="preset-icon">💕</span>
-            <span class="preset-name">深情恋人</span>
-          </div>
-          <div class="preset-card" data-preset="lazy" onclick="selectPreset(this)">
-            <span class="preset-icon">😴</span>
-            <span class="preset-name">慵懒猫咪</span>
-          </div>
-          <div class="preset-card" data-preset="coquetry" onclick="selectPreset(this)">
-            <span class="preset-icon">🥰</span>
-            <span class="preset-name">撒娇达人</span>
-          </div>
-          <div class="preset-card" data-preset="sad_poet" onclick="selectPreset(this)">
-            <span class="preset-icon">😢</span>
-            <span class="preset-name">忧郁诗人</span>
-          </div>
-          <div class="preset-card" data-preset="emperor" onclick="selectPreset(this)">
-            <span class="preset-icon">👑</span>
-            <span class="preset-name">霸气帝王</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Divider -->
-      <div style="border-top:1px solid var(--border); margin:8px 0 12px; font-size:0.7rem; color:var(--muted); text-align:center; line-height:1;">
-        <span style="background:var(--card); padding:0 8px; position:relative; top:-6px;">手动微调</span>
-      </div>
-
-      <!-- Emotion -->
-      <div class="style-section">
-        <div class="style-section-title">😊 情绪</div>
-        <div class="chip-group" id="emotionChips">
-          <div class="chip active" data-value="">默认</div>
-          <div class="chip" data-value="开心" data-insert="开心">😊 开心</div>
-          <div class="chip" data-value="悲伤" data-insert="悲伤">😢 悲伤</div>
-          <div class="chip" data-value="生气" data-insert="生气">😠 生气</div>
-          <div class="chip" data-value="平静" data-insert="平静">😌 平静</div>
-          <div class="chip" data-value="深情款款" data-insert="深情款款">💕 深情</div>
-          <div class="chip" data-value="慵懒 刚睡醒" data-insert="慵懒 刚睡醒">😴 慵懒</div>
-          <div class="chip" data-value="撒娇 夹子音" data-insert="撒娇 夹子音">🥰 撒娇</div>
-        </div>
-      </div>
-
-      <!-- Dialect -->
-      <div class="style-section">
-        <div class="style-section-title">🗺️ 方言</div>
-        <div class="chip-group" id="dialectChips">
-          <div class="chip active" data-value="">普通话</div>
-          <div class="chip" data-value="东北话" data-insert="东北话">🌲 东北</div>
-          <div class="chip" data-value="四川话" data-insert="四川话">🌶️ 四川</div>
-          <div class="chip" data-value="台湾腔" data-insert="台湾腔">🧋 台湾</div>
-          <div class="chip" data-value="粤语" data-insert="粤语">🥟 粤语</div>
-        </div>
-      </div>
-
-      <!-- Role -->
-      <div class="style-section">
-        <div class="style-section-title">🎭 角色</div>
-        <div class="chip-group" id="roleChips">
-          <div class="chip active" data-value="">默认</div>
-          <div class="chip" data-value="像个大将军" data-insert="像个大将军">⚔️ 将军</div>
-          <div class="chip" data-value="像个小孩" data-insert="像个小孩">🧒 小孩</div>
-          <div class="chip" data-value="孙悟空" data-insert="孙悟空">🐵 悟空</div>
-          <div class="chip" data-value="像个新闻主播" data-insert="像个新闻主播">📺 主播</div>
-          <div class="chip" data-value="像个老师" data-insert="像个老师">📚 老师</div>
-        </div>
-      </div>
-
-      <!-- Tone -->
-      <div class="style-section">
-        <div class="style-section-title">💬 语气</div>
-        <div class="chip-group" id="toneChips">
-          <div class="chip active" data-value="">自然</div>
-          <div class="chip" data-value="悄悄话" data-insert="悄悄话">🤫 悄悄话</div>
-          <div class="chip" data-value="大声喊" data-insert="大声喊">📢 大声喊</div>
-          <div class="chip" data-value="清晰有力" data-insert="清晰有力">💪 有力</div>
-        </div>
-      </div>
-
-      <!-- Singing -->
-      <div class="style-section">
-        <div class="style-section-title">🎵 唱歌</div>
-        <div class="chip-group" id="singChips">
-          <div class="chip active" data-value="">关闭</div>
-          <div class="chip" data-value="__sing_on__" onclick="toggleSing(true)">🎤 开启</div>
-          <div class="chip" data-value="__sing_off__" style="display:none" onclick="toggleSing(false)">⏹️ 关闭</div>
-        </div>
-      </div>
-      <div id="singPanel">
-        <div class="style-section">
-          <div class="style-section-title">🎶 歌词</div>
-          <div class="chip-group" id="songChips">
-            <div class="chip active" data-value="">直接输入</div>
-            <div class="chip" data-value="两只老虎">🐯 两只老虎</div>
-            <div class="chip" data-value="小星星">⭐ 小星星</div>
-            <div class="chip" data-value="生日快乐">🎂 生日快乐</div>
-          </div>
-        </div>
-        <textarea id="singInput" placeholder="输入歌词或选择预置歌曲…"></textarea>
-      </div>
-
-      <!-- Custom style -->
-      <div class="style-section" style="margin-top:8px;">
-        <div class="style-section-title">✏️ 自定义风格（覆盖上方选项）</div>
-        <input type="text" id="customStyle" placeholder="如：语速慢 清晰 像个新闻主播" />
-      </div>
-    </div>
-
-    <!-- Quick Tags (preset + custom) -->
-    <div class="card">
-      <div class="card-title"><span class="icon">⚡</span> 快捷标签
-        <span style="margin-left:auto; font-size:0.72rem; font-weight:400; color:var(--muted);">点击插入到文本</span>
-      </div>
-
-      <!-- Preset quick tags -->
-      <div class="style-section">
-        <div class="style-section-title">📌 预设标签</div>
-        <div class="chip-group" id="presetQuickTags">
-          <div class="chip qt" data-tag="男声">👨 男声</div>
-          <div class="chip qt" data-tag="女声">👩 女声</div>
-          <div class="chip qt" data-tag="童声">🧒 童声</div>
-          <div class="chip qt" data-tag="老人声">👴 老人</div>
-          <div class="chip qt" data-tag="机器人声">🤖 机器</div>
-          <div class="chip qt" data-tag="温柔">🫧 温柔</div>
-          <div class="chip qt" data-tag="磁性">🧲 磁性</div>
-          <div class="chip qt" data-tag="沙哑">🪨 沙哑</div>
-          <div class="chip qt" data-tag="甜美">🍬 甜美</div>
-          <div class="chip qt" data-tag="低沉">🔉 低沉</div>
-          <div class="chip qt" data-tag="尖锐">🔔 尖锐</div>
-          <div class="chip qt" data-tag="浑厚">🥁 浑厚</div>
-          <div class="chip qt" data-tag="东北话">🌲 东北话</div>
-          <div class="chip qt" data-tag="四川话">🌶️ 四川话</div>
-          <div class="chip qt" data-tag="粤语">🥟 粤语</div>
-          <div class="chip qt" data-tag="台湾腔">🧋 台湾腔</div>
-          <div class="chip qt" data-tag="河南话">🌾 河南话</div>
-          <div class="chip qt" data-tag="上海话">🏙️ 上海话</div>
-          <div class="chip qt" data-tag="陕西话">🍜 陕西话</div>
-          <div class="chip qt" data-tag="湖南话">🌶️ 湖南话</div>
-          <div class="chip qt" data-tag="像个新闻主播">📺 主播</div>
-          <div class="chip qt" data-tag="像个老师">📚 老师</div>
-          <div class="chip qt" data-tag="像个大将军">⚔️ 将军</div>
-          <div class="chip qt" data-tag="孙悟空">🐵 孙悟空</div>
-          <div class="chip qt" data-tag="林黛玉">🌸 林黛玉</div>
-          <div class="chip qt" data-tag="像个小孩子">👶 小孩</div>
-          <div class="chip qt" data-tag="皇帝">👑 皇帝</div>
-          <div class="chip qt" data-tag="仙女">🧚 仙女</div>
-          <div class="chip qt" data-tag="开心">😊 开心</div>
-          <div class="chip qt" data-tag="悲伤">😢 悲伤</div>
-          <div class="chip qt" data-tag="愤怒">😡 愤怒</div>
-          <div class="chip qt" data-tag="恐惧">😨 恐惧</div>
-          <div class="chip qt" data-tag="惊讶">😲 惊讶</div>
-          <div class="chip qt" data-tag="深情款款">💕 深情</div>
-          <div class="chip qt" data-tag="慵懒 刚睡醒">😴 慵懒</div>
-          <div class="chip qt" data-tag="撒娇 夹子音">🥰 撒娇</div>
-          <div class="chip qt" data-tag="悄悄话">🤫 悄悄话</div>
-          <div class="chip qt" data-tag="大声喊">📢 大喊</div>
-          <div class="chip qt" data-tag="神秘低语">🌙 低语</div>
-          <div class="chip qt" data-tag="哭泣">😭 哭泣</div>
-          <div class="chip qt" data-tag="笑">😄 笑</div>
-          <div class="chip qt" data-tag="语速0.6x">🐢 极慢</div>
-          <div class="chip qt" data-tag="语速0.8x">🚶 慢速</div>
-          <div class="chip qt" data-tag="语速1.2x">🏃 快速</div>
-          <div class="chip qt" data-tag="语速1.5x">🏃 极快</div>
-          <div class="chip qt" data-tag="停顿300ms">⏸ 短停</div>
-          <div class="chip qt" data-tag="停顿800ms">⏸ 中停</div>
-          <div class="chip qt" data-tag="停顿1500ms">⏸ 长停</div>
-        </div>
-      </div>
-
-      <!-- User custom tags -->
-      <div class="style-section">
-        <div class="style-section-title">🏷️ 自定义标签</div>
-        <div class="chip-group" id="customTagsList"></div>
-        <div id="customTagsEmpty" style="font-size:0.76rem; color:var(--muted); padding:4px 0;">点击下方按钮添加你自己的标签</div>
-        <div style="display:flex; gap:6px; margin-top:8px;">
-          <input type="text" id="customTagInput" placeholder="标签名（如：奥特曼）" style="flex:1; font-size:0.82rem; padding:6px 10px;" />
-          <input type="text" id="customTagValue" placeholder="插入值（如：奥特曼声线）" style="flex:1.5; font-size:0.82rem; padding:6px 10px;" />
-          <button class="btn btn-sm" onclick="addCustomTag()" style="white-space:nowrap; padding:6px 12px;">＋ 添加</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Advanced Settings -->
+    <!-- Parameters -->
     <div class="card">
       <div class="card-title collapsible open" onclick="toggleCollapse(this)">
         <span class="icon">⚙️</span> 参数调节 <span class="chevron">▼</span>
       </div>
       <div class="collapsible-body open">
-
-      <!-- Preview mode -->
-      <div class="toggle-row">
-        <div class="toggle-switch" id="previewToggle" onclick="togglePreview()"></div>
-        <span>试听模式（仅前50字）</span>
-      </div>
-
-      <!-- Normalize -->
-      <div class="toggle-row">
-        <div class="toggle-switch on" id="normalizeToggle" onclick="toggleNormalize()"></div>
-        <span>自动文本规范化</span>
-      </div>
 
       <!-- Format -->
       <label>下载格式</label>
@@ -1037,7 +600,6 @@
         <label>语速</label>
         <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSliderVal('speedVal', this.value, 'x')" />
         <span class="slider-val" id="speedVal">1.0x</span>
-        <button class="slider-insert-btn" onclick="insertSliderTag('speed')" title="插入到文本">＋</button>
       </div>
 
       <!-- Volume -->
@@ -1045,7 +607,6 @@
         <label>音量</label>
         <input type="range" id="volumeSlider" min="0" max="200" step="5" value="100" oninput="updateSliderVal('volumeVal', this.value, '%')" />
         <span class="slider-val" id="volumeVal">100%</span>
-        <button class="slider-insert-btn" onclick="insertSliderTag('volume')" title="插入到文本">＋</button>
       </div>
 
       <!-- Pitch -->
@@ -1053,7 +614,6 @@
         <label>音高</label>
         <input type="range" id="pitchSlider" min="-12" max="12" step="1" value="0" oninput="updateSliderVal('pitchVal', this.value, '')" />
         <span class="slider-val" id="pitchVal">0</span>
-        <button class="slider-insert-btn" onclick="insertSliderTag('pitch')" title="插入到文本">＋</button>
       </div>
 
       <!-- Pause -->
@@ -1061,123 +621,12 @@
         <label>停顿</label>
         <input type="range" id="pauseSlider" min="0" max="3000" step="100" value="0" oninput="updateSliderVal('pauseVal', this.value, 'ms')" />
         <span class="slider-val" id="pauseVal">0ms</span>
-        <button class="slider-insert-btn" onclick="insertSliderTag('pause')" title="插入到文本">＋</button>
       </div>
-      <div style="font-size:0.7rem; color:var(--muted); margin-top:-4px;">点击 ＋ 插入到文本光标处，或作为段落间停顿</div>
+      <div style="font-size:0.7rem; color:var(--muted); margin-top:-4px;">多行文本时作为段落间停顿</div>
 
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ══════════ API Docs Overlay ══════════ -->
-<div class="docs-overlay" id="docsOverlay" onclick="if(event.target===this)toggleDocs()">
-  <div class="docs-content">
-    <button class="docs-close" onclick="toggleDocs()">✕</button>
-    <div class="card-title" style="font-size:1.1rem;"><span class="icon">📖</span> MiMo v2 TTS API 文档</div>
-
-    <div class="doc-section">
-      <h3>📡 接口信息</h3>
-      <table class="doc-table">
-        <tr><th>项目</th><th>值</th></tr>
-        <tr><td>模型</td><td><code>mimo-v2-audio-tts</code></td></tr>
-        <tr><td>API 端点</td><td><code>https://api.xiaomimimo.com/v1/chat/completions</code></td></tr>
-        <tr><td>认证方式</td><td>Header <code>api-key: YOUR_KEY</code></td></tr>
-        <tr><td>输出格式</td><td>WAV (24kHz, 16-bit PCM, 单声道)</td></tr>
-        <tr><td>最大文本长度</td><td>10,000 字符</td></tr>
-      </table>
-    </div>
-
-    <div class="doc-section">
-      <h3>📤 请求格式</h3>
-      <div class="code-block">
-        <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
-<pre><code>curl -X POST https://api.xiaomimimo.com/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "api-key: YOUR_API_KEY" \
-  -d '{
-    "model": "mimo-v2-audio-tts",
-    "audio": {"format": "wav", "voice": "mimo_default"},
-    "messages": [
-      {"role": "assistant", "content": "你好，我是小米AI语音助手。"}
-    ]
-  }'</code></pre>
       </div>
     </div>
 
-    <div class="doc-section">
-      <h3>🎨 风格能力一览</h3>
-      <table class="doc-table">
-        <tr><th>分类</th><th>示例</th><th>说明</th></tr>
-        <tr><td>情绪</td><td><code>开心</code> <code>悲伤</code> <code>生气</code></td><td>控制语音情感基调</td></tr>
-        <tr><td>方言</td><td><code>东北话</code> <code>四川话</code> <code>粤语</code></td><td>模拟不同地区口音</td></tr>
-        <tr><td>角色</td><td><code>像个大将军</code> <code>像个小孩</code> <code>孙悟空</code></td><td>模仿特定角色声音</td></tr>
-        <tr><td>组合</td><td><code>深情款款 语速慢</code> <code>撒娇 台湾腔</code></td><td>多个风格自由组合</td></tr>
-        <tr><td>唱歌</td><td><code>唱歌</code> + 歌词内容</td><td>开启歌唱模式</td></tr>
-      </table>
-    </div>
-
-    <div class="doc-section">
-      <h3>📥 响应格式</h3>
-      <div class="code-block">
-        <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
-<pre><code>{
-  "choices": [{
-    "message": {
-      "audio": { "data": "&lt;base64-encoded-wav&gt;" }
-    }
-  }]
-}</code></pre>
-      </div>
-    </div>
-
-    <div class="doc-section">
-      <h3>🐍 Python 示例</h3>
-      <div class="code-block">
-        <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
-<pre><code>import requests, base64
-
-resp = requests.post(
-    "https://api.xiaomimimo.com/v1/chat/completions",
-    headers={
-        "Content-Type": "application/json",
-        "api-key": "YOUR_API_KEY"
-    },
-    json={
-        "model": "mimo-v2-audio-tts",
-        "audio": {"format": "wav", "voice": "mimo_default"},
-        "messages": [
-            {"role": "assistant", "content": "今天天气真不错！"}
-        ],
-    },
-)
-
-audio = base64.b64decode(resp.json()["choices"][0]["message"]["audio"]["data"])
-with open("output.wav", "wb") as f:
-    f.write(audio)</code></pre>
-      </div>
-    </div>
-
-    <div class="doc-section">
-      <h3>⚙️ 环境变量</h3>
-      <table class="doc-table">
-        <tr><th>变量</th><th>默认值</th><th>说明</th></tr>
-        <tr><td><code>MIMO_API_KEY</code></td><td>—</td><td>MiMo API 密钥（必需）</td></tr>
-        <tr><td><code>MIMO_API_ENDPOINT</code></td><td><code>https://api.xiaomimimo.com/...</code></td><td>自定义 API 端点</td></tr>
-        <tr><td><code>PORT</code></td><td><code>3210</code></td><td>Web 服务端口</td></tr>
-      </table>
-    </div>
-
-    <div class="doc-section">
-      <h3>⚠️ 错误码</h3>
-      <table class="doc-table">
-        <tr><th>HTTP 状态</th><th>可能原因</th></tr>
-        <tr><td><code>400</code></td><td>请求参数错误</td></tr>
-        <tr><td><code>401</code></td><td>API Key 无效或未设置</td></tr>
-        <tr><td><code>500</code></td><td>服务端错误</td></tr>
-      </table>
-    </div>
   </div>
 </div>
 
@@ -1187,39 +636,12 @@ with open("output.wav", "wb") as f:
   let currentFilename = 'tts_output.wav';
   let currentMimeType = 'audio/wav';
   let history = JSON.parse(localStorage.getItem('tts_history') || '[]');
-  let autoNormalize = true;
-  let previewMode = false;
   let outputFormat = 'wav';
-  let isSinging = false;
-
-  // ── Role Presets ──
-  const rolePresets = {
-    '':             { emotion: '',          dialect: '',       role: '',                tone: '' },
-    'wukong':       { emotion: '生气',      dialect: '',       role: '孙悟空',          tone: '大声喊' },
-    'news_anchor':  { emotion: '平静',      dialect: '',       role: '像个新闻主播',    tone: '清晰有力' },
-    'teacher':      { emotion: '平静',      dialect: '',       role: '像个老师',        tone: '' },
-    'general':      { emotion: '生气',      dialect: '',       role: '像个大将军',      tone: '大声喊' },
-    'child':        { emotion: '开心',      dialect: '',       role: '像个小孩',        tone: '' },
-    'dongbei':      { emotion: '开心',      dialect: '东北话', role: '',                tone: '大声喊' },
-    'sichuan':      { emotion: '开心',      dialect: '四川话', role: '',                tone: '' },
-    'cantonese':    { emotion: '',          dialect: '粤语',   role: '',                tone: '' },
-    'taiwan':       { emotion: '撒娇 夹子音', dialect: '台湾腔', role: '',              tone: '' },
-    'whisper':      { emotion: '平静',      dialect: '',       role: '',                tone: '悄悄话' },
-    'lover':        { emotion: '深情款款',  dialect: '',       role: '',                tone: '' },
-    'lazy':         { emotion: '慵懒 刚睡醒', dialect: '',     role: '',                tone: '' },
-    'coquetry':     { emotion: '撒娇 夹子音', dialect: '',     role: '',                tone: '' },
-    'sad_poet':     { emotion: '悲伤',      dialect: '',       role: '',                tone: '' },
-    'emperor':      { emotion: '生气',      dialect: '',       role: '像个大将军',      tone: '清晰有力' },
-  };
 
   // ── Init ──
   document.addEventListener('DOMContentLoaded', () => {
-    initChips();
-    initQuickTags();
-    renderCustomTags();
     renderHistory();
     loadApiKey();
-    updateUndoRedoBtn();
   });
 
   // ── Collapsible ──
@@ -1227,14 +649,6 @@ with open("output.wav", "wb") as f:
     const body = el.nextElementSibling;
     el.classList.toggle('open');
     body.classList.toggle('open');
-  }
-
-  // ── Docs Overlay ──
-  function toggleDocs() {
-    document.getElementById('docsOverlay').classList.toggle('show');
-  }
-  function showMain() {
-    document.getElementById('docsOverlay').classList.remove('show');
   }
 
   // ── API Key ──
@@ -1258,18 +672,10 @@ with open("output.wav", "wb") as f:
     else { input.type = 'password'; icon.textContent = '👁️'; }
   }
 
-  // ── Undo / Redo Stack ──
+  // ── Undo / Redo ──
   let undoStack = [];
   let redoStack = [];
-
-  function saveUndo() {
-    const val = textInput.value;
-    if (undoStack.length > 0 && undoStack[undoStack.length - 1] === val) return;
-    undoStack.push(val);
-    if (undoStack.length > 50) undoStack.shift();
-    redoStack = []; // clear redo on new action
-    updateUndoRedoBtn();
-  }
+  let undoSaveNeeded = true;
 
   function undoText() {
     if (undoStack.length === 0) return;
@@ -1278,11 +684,9 @@ with open("output.wav", "wb") as f:
     const prev = undoStack.pop();
     textInput.value = prev;
     charCount.textContent = prev.length;
-    updateLinePreview(prev);
     textInput.focus();
     updateUndoRedoBtn();
   }
-
   function redoText() {
     if (redoStack.length === 0) return;
     const current = textInput.value;
@@ -1290,371 +694,12 @@ with open("output.wav", "wb") as f:
     const next = redoStack.pop();
     textInput.value = next;
     charCount.textContent = next.length;
-    updateLinePreview(next);
     textInput.focus();
     updateUndoRedoBtn();
   }
-
   function updateUndoRedoBtn() {
-    const uBtn = document.getElementById('undoBtn');
-    const uBadge = document.getElementById('undoCount');
-    const rBtn = document.getElementById('redoBtn');
-    const rBadge = document.getElementById('redoCount');
-
-    if (undoStack.length > 0) {
-      uBtn.style.opacity = '1';
-      uBadge.style.display = 'flex';
-      uBadge.textContent = undoStack.length;
-    } else {
-      uBtn.style.opacity = '0.4';
-      uBadge.style.display = 'none';
-    }
-
-    if (redoStack.length > 0) {
-      rBtn.style.opacity = '1';
-      rBadge.style.display = 'flex';
-      rBadge.textContent = redoStack.length;
-    } else {
-      rBtn.style.opacity = '0.4';
-      rBadge.style.display = 'none';
-    }
-  }
-
-  // ── Insert text at cursor in textarea ──
-  function insertAtCursor(text, addNewline) {
-    saveUndo();
-    const ta = textInput;
-    const start = ta.selectionStart;
-    const val = ta.value;
-
-    // Find beginning of current line
-    const lineStart = val.lastIndexOf('\n', start - 1) + 1;
-    const beforeLine = val.slice(0, lineStart);
-    const line = val.slice(lineStart);
-
-    if (addNewline) {
-      // Insert as new line at cursor
-      const before = val.slice(0, start);
-      const after = val.slice(ta.selectionEnd);
-      const insertText = (start > 0 && !val[start - 1]?.match(/\n/) ? '\n' : '') + text + '\n';
-      ta.value = before + insertText + after;
-      ta.selectionStart = ta.selectionEnd = start + insertText.length;
-    } else {
-      // Insert [tag] at the start of current line
-      ta.value = beforeLine + text + line;
-      ta.selectionStart = ta.selectionEnd = start + text.length;
-    }
-    ta.focus();
-    charCount.textContent = ta.value.length;
-    updateLinePreview(ta.value);
-  }
-
-  // ── Chip Selection (dual: global style + insert tag) ──
-  function initChips() {
-    const chipGroups = ['emotionChips','dialectChips','roleChips','toneChips'];
-    chipGroups.forEach(id => {
-      document.getElementById(id).addEventListener('click', e => {
-        const chip = e.target.closest('.chip');
-        if (!chip) return;
-        // Select as global style
-        document.getElementById(id).querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        // Deselect preset (manual override)
-        deselectPreset();
-        // Also insert [tag] into textarea if it has a data-insert value
-        const insertVal = chip.dataset.insert;
-        if (insertVal) {
-          insertAtCursor('[' + insertVal + ']');
-        }
-      });
-    });
-
-    document.getElementById('songChips').addEventListener('click', e => {
-      const chip = e.target.closest('.chip');
-      if (!chip) return;
-      document.getElementById('songChips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      const val = chip.dataset.value;
-      if (val) {
-        document.getElementById('singInput').value = '';
-        document.getElementById('singInput').placeholder = `预置歌曲：${chip.textContent.trim()}`;
-      } else {
-        document.getElementById('singInput').placeholder = '输入歌词或选择预置歌曲…';
-      }
-    });
-  }
-
-  // ── Role Preset Selection ──
-  function selectPreset(el) {
-    const presetId = el.dataset.preset;
-    const preset = rolePresets[presetId];
-    if (!preset) return;
-
-    // Update preset cards active state
-    document.querySelectorAll('#rolePresetGrid .preset-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-
-    // Apply preset to individual chips
-    setChipValue('emotionChips', preset.emotion);
-    setChipValue('dialectChips', preset.dialect);
-    setChipValue('roleChips', preset.role);
-    setChipValue('toneChips', preset.tone);
-  }
-
-  function deselectPreset() {
-    document.querySelectorAll('#rolePresetGrid .preset-card').forEach(c => c.classList.remove('active'));
-    // Don't auto-select "自定义", just leave nothing selected visually
-  }
-
-  function setChipValue(groupId, value) {
-    const group = document.getElementById(groupId);
-    group.querySelectorAll('.chip').forEach(c => {
-      c.classList.toggle('active', c.dataset.value === value);
-    });
-  }
-  function getChipValue(groupId) {
-    const active = document.querySelector(`#${groupId} .chip.active`);
-    return active ? active.dataset.value : '';
-  }
-
-  // ── Slider tag insertion ──
-  function insertSliderTag(type) {
-    let tag = '';
-    switch (type) {
-      case 'speed': {
-        const v = parseFloat(document.getElementById('speedSlider').value);
-        if (v === 1.0) return; // default, skip
-        tag = '语速' + v + 'x';
-        break;
-      }
-      case 'volume': {
-        const v = parseInt(document.getElementById('volumeSlider').value);
-        if (v === 100) return;
-        tag = '音量' + v + '%';
-        break;
-      }
-      case 'pitch': {
-        const v = parseInt(document.getElementById('pitchSlider').value);
-        if (v === 0) return;
-        tag = '音高' + (v > 0 ? '+' : '') + v;
-        break;
-      }
-      case 'pause': {
-        const v = parseInt(document.getElementById('pauseSlider').value);
-        if (v === 0) return;
-        tag = '停顿' + v + 'ms';
-        break;
-      }
-    }
-    if (tag) insertAtCursor('[' + tag + ']', type === 'pause');
-  }
-
-  // ── Preset Quick Tags (click to insert) ──
-  function initQuickTags() {
-    document.getElementById('presetQuickTags').addEventListener('click', e => {
-      const chip = e.target.closest('.chip.qt');
-      if (!chip) return;
-      const tag = chip.dataset.tag;
-      if (tag) insertAtCursor('[' + tag + ']');
-    });
-  }
-
-  // ── Custom Tags ──
-  let customTags = JSON.parse(localStorage.getItem('mimo_custom_tags') || '[]');
-
-  function addCustomTag() {
-    const nameInput = document.getElementById('customTagInput');
-    const valueInput = document.getElementById('customTagValue');
-    const name = nameInput.value.trim();
-    const value = valueInput.value.trim();
-    if (!name || !value) return;
-    // Prevent duplicates
-    if (customTags.some(t => t.name === name)) {
-      nameInput.style.borderColor = 'var(--danger)';
-      setTimeout(() => nameInput.style.borderColor = '', 1500);
-      return;
-    }
-    customTags.push({ name, value });
-    localStorage.setItem('mimo_custom_tags', JSON.stringify(customTags));
-    nameInput.value = '';
-    valueInput.value = '';
-    renderCustomTags();
-  }
-
-  function deleteCustomTag(index) {
-    customTags.splice(index, 1);
-    localStorage.setItem('mimo_custom_tags', JSON.stringify(customTags));
-    renderCustomTags();
-  }
-
-  function renderCustomTags() {
-    const list = document.getElementById('customTagsList');
-    const empty = document.getElementById('customTagsEmpty');
-    if (customTags.length === 0) {
-      list.innerHTML = '';
-      empty.style.display = 'block';
-      return;
-    }
-    empty.style.display = 'none';
-    list.innerHTML = customTags.map((t, i) =>
-      `<span class="custom-tag-chip" onclick="insertAtCursor('[${escHtml(t.value)}]')">
-        ${escHtml(t.name)}
-        <span class="ct-del" onclick="event.stopPropagation(); deleteCustomTag(${i})" title="删除">✕</span>
-      </span>`
-    ).join(' ');
-  }
-
-  // Allow Enter key to add custom tag
-  document.getElementById('customTagValue').addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); addCustomTag(); }
-  });
-  document.getElementById('customTagInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customTagValue').focus(); }
-  });
-
-  // ── Singing ──
-  function toggleSing(on) {
-    isSinging = on;
-    const panel = document.getElementById('singPanel');
-    const onChip = document.querySelector('#singChips .chip[data-value="__sing_on__"]');
-    const offChip = document.querySelector('#singChips .chip[data-value="__sing_off__"]');
-    const defaultChip = document.querySelector('#singChips .chip[data-value=""]');
-    document.querySelectorAll('#singChips .chip').forEach(c => c.classList.remove('active'));
-    if (on) {
-      panel.style.display = 'block';
-      onChip.classList.add('active');
-      defaultChip.style.display = 'none';
-      offChip.style.display = '';
-    } else {
-      panel.style.display = 'none';
-      defaultChip.classList.add('active');
-      offChip.style.display = 'none';
-      onChip.style.display = '';
-    }
-  }
-
-  // ── Toggles ──
-  function toggleNormalize() {
-    autoNormalize = !autoNormalize;
-    document.getElementById('normalizeToggle').classList.toggle('on', autoNormalize);
-  }
-  function togglePreview() {
-    previewMode = !previewMode;
-    document.getElementById('previewToggle').classList.toggle('on', previewMode);
-  }
-
-  // ── Format ──
-  function selectFormat(el) {
-    document.querySelectorAll('.format-pill').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    outputFormat = el.dataset.fmt;
-  }
-
-  // ── Sliders ──
-  function updateSliderVal(valId, value, suffix) {
-    document.getElementById(valId).textContent = value + suffix;
-  }
-
-  // ── Build Style ──
-  function buildStyle() {
-    const custom = document.getElementById('customStyle').value.trim();
-    if (custom) return custom;
-    if (isSinging) return '唱歌';
-    return [
-      getChipValue('emotionChips'),
-      getChipValue('dialectChips'),
-      getChipValue('roleChips'),
-      getChipValue('toneChips'),
-    ].filter(Boolean).join(' ');
-  }
-
-  // ── Text Normalization ──
-  function normalizeText(text) {
-    if (!autoNormalize) return text;
-    let result = text;
-    result = result.replace(/(\d+)\.(\d+)/g, (_, a, b) => {
-      const digits = ['零','一','二','三','四','五','六','七','八','九'];
-      return a.split('').map(d => digits[parseInt(d)]).join('') + '点' + b.split('').map(d => digits[parseInt(d)]).join('');
-    });
-    result = result.replace(/(\d+)%/g, (_, n) => {
-      const numMap = { '0':'零','1':'一','2':'二','3':'三','4':'四','5':'五','6':'六','7':'七','8':'八','9':'九' };
-      return '百分之' + n.split('').map(d => numMap[d] || d).join('');
-    });
-    return result;
-  }
-
-  // ── Multi-role helpers ──
-  function toggleRoleTip() {
-    document.getElementById('roleTip').style.display =
-      document.getElementById('roleTip').style.display === 'none' ? 'block' : 'none';
-  }
-
-  function insertTag(tag) {
-    saveUndo();
-    const ta = document.getElementById('textInput');
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
-    const val = ta.value;
-
-    // If cursor is at start of a line or at the very beginning, insert directly
-    const beforeCursor = val.slice(0, start);
-    const atLineStart = start === 0 || beforeCursor.endsWith('\n');
-
-    if (atLineStart) {
-      ta.value = val.slice(0, start) + tag + val.slice(end);
-    } else {
-      const insertText = beforeCursor.endsWith('\n') ? tag : '\n' + tag;
-      ta.value = val.slice(0, start) + insertText + val.slice(end);
-      ta.selectionStart = ta.selectionEnd = start + insertText.length;
-    }
-    ta.focus();
-    charCount.textContent = ta.value.length;
-    updateLinePreview(ta.value);
-  }
-
-  // ── Parse bracket tags from a line (client-side preview) ──
-  function parseClientLineTags(line) {
-    const tags = [];
-    let pauseTags = [];
-    let rest = line.trimStart();
-    const re = /^\[([^\]]+)\]\s*/;
-    let m;
-    while ((m = rest.match(re))) {
-      const tag = m[1].trim();
-      if (/^(?:停顿|pause)\s*\d+\s*(?:ms|毫秒)?$/i.test(tag)) {
-        pauseTags.push(tag);
-      } else {
-        tags.push(tag);
-      }
-      rest = rest.slice(m[0].length);
-    }
-    return { tags, pauseTags, text: rest.trim() };
-  }
-
-  // ── Line preview (show parsed tags) ──
-  function updateLinePreview(text) {
-    const el = document.getElementById('linePreview');
-    if (!text.trim()) { el.classList.remove('show'); return; }
-
-    const lines = text.split('\n').filter(l => l.trim());
-    const tagged = [];
-    for (const line of lines) {
-      const { tags, pauseTags, text: lineText } = parseClientLineTags(line);
-      if (tags.length > 0 || pauseTags.length > 0) {
-        tagged.push({ tags, pauseTags, text: lineText || line });
-      }
-    }
-
-    if (tagged.length === 0) { el.classList.remove('show'); return; }
-
-    el.classList.add('show');
-    el.innerHTML = tagged.map(item =>
-      `<div class="line-preview-item">
-        ${item.tags.map(t => `<span class="line-preview-tag">${escHtml(t)}</span>`).join('')}
-        ${item.pauseTags.map(t => `<span class="line-preview-tag" style="background:#fff3e0; color:#e65100;">⏸ ${escHtml(t)}</span>`).join('')}
-        <span class="line-preview-text">${escHtml(item.text)}</span>
-      </div>`
-    ).join('');
+    document.getElementById('undoBtn').style.opacity = undoStack.length > 0 ? '1' : '0.4';
+    document.getElementById('redoBtn').style.opacity = redoStack.length > 0 ? '1' : '0.4';
   }
 
   // ── UI Refs ──
@@ -1664,19 +709,16 @@ with open("output.wav", "wb") as f:
   const loadingEl = document.getElementById('loading');
   const errorMsg = document.getElementById('errorMsg');
 
-  let undoSaveNeeded = true;
   textInput.addEventListener('input', () => {
     charCount.textContent = textInput.value.length;
-    updateLinePreview(textInput.value);
   });
-  // Save undo state right before user modifies text (keydown is before the change)
   textInput.addEventListener('keydown', () => {
     if (undoSaveNeeded) {
       const lastSaved = undoStack.length > 0 ? undoStack[undoStack.length - 1] : null;
       if (lastSaved !== textInput.value) {
         undoStack.push(textInput.value);
         if (undoStack.length > 50) undoStack.shift();
-        redoStack = []; // clear redo on new edit
+        redoStack = [];
         updateUndoRedoBtn();
       }
       undoSaveNeeded = false;
@@ -1691,241 +733,164 @@ with open("output.wav", "wb") as f:
     setTimeout(() => errorMsg.classList.remove('show'), 8000);
   }
 
-  // ── Generate ──
-  async function generate(isPreview) {
-    let text = textInput.value.trim();
-    if (!text) { showError('请输入文字'); return; }
+  // ── Proofread ──
+  async function proofread() {
+    const text = textInput.value.trim();
+    if (!text) { showError('请先输入文字'); return; }
 
-    const usePreview = isPreview || previewMode;
-    if (usePreview && text.length > 50) text = text.slice(0, 50);
-    text = normalizeText(text);
+    const btn = document.getElementById('proofreadBtn');
+    const loading = document.getElementById('proofreadLoading');
+    const result = document.getElementById('proofreadResult');
+    const errEl = document.getElementById('proofreadError');
 
-    let style = buildStyle();
-    if (isSinging) {
-      const songVal = getChipValue('songChips');
-      const singText = document.getElementById('singInput').value.trim();
-      if (!songVal && !singText) { showError('唱歌模式下请选择歌曲或输入歌词'); return; }
-      text = singText ? 'LYRICS:' + singText : songVal;
+    btn.disabled = true;
+    loading.style.display = 'block';
+    result.style.display = 'none';
+    errEl.classList.remove('show');
+
+    try {
+      const body = { text };
+      const pageApiKey = document.getElementById('apiKeyInput').value.trim();
+      if (pageApiKey) body.apiKey = pageApiKey;
+
+      const res = await fetch('/api/proofread', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+
+      renderProofreadResult(data);
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add('show');
+      setTimeout(() => errEl.classList.remove('show'), 8000);
+    } finally {
+      btn.disabled = false;
+      loading.style.display = 'none';
+    }
+  }
+
+  function renderProofreadResult(data) {
+    const el = document.getElementById('proofreadResult');
+    const issues = data.issues || [];
+    let html = '';
+
+    if (data.summary) {
+      html += `<div class="pr-summary">💡 ${escHtml(data.summary)}</div>`;
     }
 
-    const btn = isPreview ? document.getElementById('previewBtn') : generateBtn;
-    btn.disabled = true;
+    if (issues.length === 0 && !data.summary) {
+      html = '<div class="pr-pass">✅ 文本校验通过，未发现问题</div>';
+    }
+
+    for (const issue of issues) {
+      const typeClass = `pr-type-${issue.type || '错别字'}`;
+      html += `<div class="pr-item">
+        <span class="pr-item-type ${typeClass}">${escHtml(issue.type || '问题')}</span>
+        ${issue.position ? `<span style="font-size:0.72rem; color:var(--muted); margin-left:6px;">${escHtml(issue.position)}</span>` : ''}
+        <div class="pr-original">原文：<del>${escHtml(issue.original || '')}</del></div>
+        <div class="pr-suggestion">建议：<ins>${escHtml(issue.suggestion || '')}</ins></div>
+        ${issue.reason ? `<div class="pr-reason">${escHtml(issue.reason)}</div>` : ''}
+      </div>`;
+    }
+
+    el.innerHTML = html;
+    el.style.display = 'block';
+  }
+
+  // ── Format ──
+  function selectFormat(el) {
+    document.querySelectorAll('.format-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    outputFormat = el.dataset.fmt;
+  }
+
+  // ── Sliders ──
+  function updateSliderVal(valId, value, suffix) {
+    document.getElementById(valId).textContent = value + suffix;
+  }
+
+  // ── Generate ──
+  async function generate() {
+    const text = textInput.value.trim();
+    if (!text) { showError('请输入文字'); return; }
+
+    generateBtn.disabled = true;
     loadingEl.classList.add('show');
     document.getElementById('resultContent').style.display = 'none';
     document.getElementById('resultEmpty').style.display = 'none';
     errorMsg.classList.remove('show');
     const startTime = Date.now();
-    const loadingText = document.getElementById('loadingText');
-
-    // Detect multi-role lines
-    const lines = text.split('\n').filter(l => l.trim().length > 0);
-    const taggedLines = lines.filter(l => /^\s*\[/.test(l));
-    const isMultiRole = taggedLines.length > 1;
 
     try {
-      let audioBase64, totalSize, outExt, outMime;
+      const body = {
+        text,
+        format: outputFormat,
+        speed: parseFloat(document.getElementById('speedSlider').value),
+        pitch: parseInt(document.getElementById('pitchSlider').value),
+        volume: parseInt(document.getElementById('volumeSlider').value),
+        pauseMs: parseInt(document.getElementById('pauseSlider').value),
+      };
+      const pageApiKey = document.getElementById('apiKeyInput').value.trim();
+      if (pageApiKey) body.apiKey = pageApiKey;
 
-      if (isMultiRole && !isSinging) {
-        // ── Line-by-line with progress ──
-        const pcmParts = [];
-        const pause = Math.max(0, Math.min(5000, parseInt(document.getElementById('pauseSlider').value) || 0));
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000);
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
 
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (!line) continue;
-
-          // Parse tags from this line
-          const lineTags = [];
-          let rest = line;
-          const re = /^\[([^\]]+)\]\s*/;
-          let m;
-          while ((m = rest.match(re))) {
-            lineTags.push(m[1].trim());
-            rest = rest.slice(m[0].length);
-          }
-          const lineText = rest.trim() || line;
-          const lineStyle = lineTags.length > 0 ? lineTags.join(' ') : style;
-
-          // Show progress
-          const tagDisplay = lineTags.length > 0 ? lineTags.map(t => `[${t}]`).join('') : '';
-          const preview = lineText.length > 20 ? lineText.slice(0, 20) + '…' : lineText;
-          loadingText.textContent = `正在生成：${tagDisplay}${preview} (${i + 1}/${lines.length})`;
-
-          const body = {
-            text: lineText,
-            style: lineStyle || undefined,
-            format: 'wav',
-            speed: parseFloat(document.getElementById('speedSlider').value),
-            pitch: parseInt(document.getElementById('pitchSlider').value),
-            volume: parseInt(document.getElementById('volumeSlider').value),
-            pauseMs: 0,
-          };
-          const pageApiKey = document.getElementById('apiKeyInput').value.trim();
-          if (pageApiKey) body.apiKey = pageApiKey;
-
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 300000);
-          const res = await fetch('/api/tts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-            signal: controller.signal,
-          });
-          clearTimeout(timeoutId);
-          const data = await res.json();
-          if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
-
-          // Decode WAV to PCM
-          const wavBuf = base64ToUint8(data.audio);
-          const pcm = extractPcmClient(wavBuf);
-          pcmParts.push(pcm);
-
-          // Add silence gap between lines
-          if (i < lines.length - 1 && pause > 0) {
-            const silenceSamples = Math.floor(24000 * pause / 1000);
-            pcmParts.push(new Uint8Array(silenceSamples * 2));
-          }
-        }
-
-        // Combine PCM into WAV
-        loadingText.textContent = '正在合并音频…';
-        const combinedPcm = concatUint8(pcmParts);
-        const wavBuffer = buildWavClient(combinedPcm, 24000, 16, 1);
-
-        outExt = outputFormat;
-        outMime = outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/wav';
-        totalSize = wavBuffer.length;
-        audioBase64 = uint8ToBase64(wavBuffer);
-
-      } else {
-        // ── Single request (original flow) ──
-        loadingText.textContent = '正在生成语音，请稍候…';
-
-        const body = {
-          text,
-          style: style || undefined,
-          format: outputFormat,
-          speed: parseFloat(document.getElementById('speedSlider').value),
-          pitch: parseInt(document.getElementById('pitchSlider').value),
-          volume: parseInt(document.getElementById('volumeSlider').value),
-          pauseMs: parseInt(document.getElementById('pauseSlider').value),
-        };
-        const pageApiKey = document.getElementById('apiKeyInput').value.trim();
-        if (pageApiKey) body.apiKey = pageApiKey;
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 300000);
-        const res = await fetch('/api/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        const data = await res.json();
-        if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
-
-        audioBase64 = data.audio;
-        totalSize = data.size;
-        outExt = data.format || 'wav';
-        outMime = data.mimeType || 'audio/wav';
-      }
-
-      // ── Play result ──
-      const byteChars = atob(audioBase64);
+      const byteChars = atob(data.audio);
       const byteArray = new Uint8Array(byteChars.length);
       for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
 
-      const blob = new Blob([byteArray], { type: outMime });
-      currentMimeType = outMime;
+      const blob = new Blob([byteArray], { type: data.mimeType || 'audio/wav' });
+      currentMimeType = data.mimeType || 'audio/wav';
 
       if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
       currentBlobUrl = URL.createObjectURL(blob);
-      currentFilename = `tts_output.${outExt}`;
+      currentFilename = data.filename || `tts_output.${data.format || 'wav'}`;
 
       const audioPlayer = document.getElementById('audioPlayer');
       audioPlayer.src = currentBlobUrl;
       audioPlayer.play().catch(() => {});
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      document.getElementById('metaSize').textContent = `📏 ${(totalSize / 1024).toFixed(1)} KB`;
+      document.getElementById('metaSize').textContent = `📏 ${(data.size / 1024).toFixed(1)} KB`;
       document.getElementById('metaTime').textContent = `⏱️ ${elapsed}s`;
-      document.getElementById('metaStyle').textContent = usePreview ? '🎧 试听' : (style ? `🎨 ${style}` : '🎨 默认');
 
       document.getElementById('resultContent').style.display = 'block';
 
       addHistory({
-        text: textInput.value.trim().slice(0, 100),
-        style: style || '默认',
+        text: text.slice(0, 100),
         speed: parseFloat(document.getElementById('speedSlider').value),
         volume: parseInt(document.getElementById('volumeSlider').value),
         pitch: parseInt(document.getElementById('pitchSlider').value),
         pauseMs: parseInt(document.getElementById('pauseSlider').value),
         format: outputFormat,
-        audioBase64: audioBase64,
+        audioBase64: data.audio,
         filename: currentFilename,
-        size: totalSize,
+        size: data.size,
         time: new Date().toLocaleString('zh-CN'),
-        mimeType: outMime,
+        mimeType: currentMimeType,
       });
     } catch (err) {
       const msg = err.name === 'AbortError' ? '请求超时（5分钟），请稍后重试' : err.message;
       showError(msg);
       document.getElementById('resultEmpty').style.display = 'block';
     } finally {
-      btn.disabled = false;
+      generateBtn.disabled = false;
       loadingEl.classList.remove('show');
-      loadingText.textContent = '正在生成语音，请稍候…';
+      document.getElementById('loadingText').textContent = '正在生成语音，请稍候…';
     }
-  }
-
-  // ── Client-side WAV/PCM helpers ──
-  function base64ToUint8(b64) {
-    const chars = atob(b64);
-    const arr = new Uint8Array(chars.length);
-    for (let i = 0; i < chars.length; i++) arr[i] = chars.charCodeAt(i);
-    return arr;
-  }
-  function uint8ToBase64(arr) {
-    let binary = '';
-    for (let i = 0; i < arr.length; i++) binary += String.fromCharCode(arr[i]);
-    return btoa(binary);
-  }
-  function extractPcmClient(wavBuf) {
-    if (wavBuf.length > 44 && String.fromCharCode(...wavBuf.slice(0,4)) === 'RIFF') {
-      return wavBuf.slice(44);
-    }
-    return wavBuf;
-  }
-  function concatUint8(parts) {
-    let total = 0;
-    for (const p of parts) total += p.length;
-    const result = new Uint8Array(total);
-    let offset = 0;
-    for (const p of parts) { result.set(p, offset); offset += p.length; }
-    return result;
-  }
-  function buildWavClient(pcmBuf, sampleRate, bitsPerSample, channels) {
-    const byteRate = sampleRate * channels * bitsPerSample / 8;
-    const blockAlign = channels * bitsPerSample / 8;
-    const dataSize = pcmBuf.length;
-    const buf = new Uint8Array(44 + dataSize);
-    const view = new DataView(buf.buffer);
-    buf.set([82,73,70,70], 0); // 'RIFF'
-    view.setUint32(4, 36 + dataSize, true);
-    buf.set([87,65,86,69], 8); // 'WAVE'
-    buf.set([102,109,116,32], 12); // 'fmt '
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, channels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, byteRate, true);
-    view.setUint16(32, blockAlign, true);
-    view.setUint16(34, bitsPerSample, true);
-    buf.set([100,97,116,97], 36); // 'data'
-    view.setUint32(40, dataSize, true);
-    buf.set(pcmBuf, 44);
-    return buf;
   }
 
   // ── Playback ──
@@ -1971,7 +936,6 @@ with open("output.wav", "wb") as f:
     clearBtn.style.display = '';
     list.innerHTML = history.map((h, i) => {
       const parts = [];
-      if (h.style && h.style !== '默认') parts.push(escHtml(h.style));
       if (h.speed && h.speed !== 1) parts.push(`${h.speed}x`);
       if (h.format && h.format !== 'wav') parts.push(h.format.toUpperCase());
       const params = parts.length ? parts.join(' · ') : '默认';
@@ -1979,7 +943,7 @@ with open("output.wav", "wb") as f:
       <div class="history-item" onclick="playHistory(${i})">
         <div style="flex:1; overflow:hidden;">
           <div class="hist-text">${escHtml(h.text)}</div>
-          <div class="hist-style">${params} · ${h.time}</div>
+          <div style="font-size:0.72rem; color:var(--accent2);">${params} · ${h.time}</div>
         </div>
         <button class="hist-play" title="播放">▶️</button>
         <button class="hist-del" onclick="event.stopPropagation(); deleteHistory(${i})" title="删除">✕</button>
@@ -2014,15 +978,6 @@ with open("output.wav", "wb") as f:
     return d.innerHTML;
   }
 
-  // ── Copy Code ──
-  function copyCode(btn) {
-    const code = btn.parentElement.querySelector('pre code');
-    navigator.clipboard.writeText(code.textContent).then(() => {
-      btn.textContent = '✅ 已复制';
-      setTimeout(() => btn.textContent = '📋 复制', 2000);
-    });
-  }
-
   // ── Keyboard ──
   textInput.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -2030,12 +985,10 @@ with open("output.wav", "wb") as f:
       generate();
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-      // Ctrl+Z = undo (prevent default browser undo to use our stack)
       e.preventDefault();
       undoText();
     }
     if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
-      // Ctrl+Y or Ctrl+Shift+Z = redo
       e.preventDefault();
       redoText();
     }

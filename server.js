@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * MiMo TTS Web — Backend Server
+ * MiMo TTS Lite — Backend Server
  *
  * Env vars:
- *   MIMO_API_KEY      (required) MiMo platform API key
- *   MIMO_API_ENDPOINT (optional) Override API endpoint
- *   MIMO_TTS_MODEL    (optional) Override model name
- *   PORT              (optional) HTTP port, default 3210
+ *   MIMO_API_KEY          (required) MiMo platform API key
+ *   MIMO_API_ENDPOINT     (optional) Override API endpoint
+ *   MIMO_TTS_MODEL        (optional) Override TTS model name
+ *   MIMO_PROOFREAD_MODEL  (optional) Override proofread text model (default: mimo-v2-pro)
+ *   PORT                  (optional) HTTP port, default 3210
  */
 
 const express = require('express');
@@ -21,16 +22,6 @@ const PORT = process.env.PORT || 3210;
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
-
-// ── Song lyrics dictionary ────────────────────────────────────────────────
-let singDict = {};
-try {
-  const dictPath = path.join(__dirname, 'sing0301_dict.json');
-  singDict = JSON.parse(fs.readFileSync(dictPath, 'utf8'));
-  console.log(`📖 Loaded ${Object.keys(singDict).length} songs from dictionary`);
-} catch {
-  console.warn('⚠️  sing0301_dict.json not found, singing mode with preset songs disabled');
-}
 
 // ── Health ─────────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
@@ -92,7 +83,7 @@ function buildWav(pcmBuffer, sampleRate = SAMPLE_RATE, bitsPerSample = BITS_PER_
 // Generate silent WAV of given duration (ms)
 function buildSilenceWav(durationMs, sampleRate = SAMPLE_RATE) {
   const numSamples = Math.floor(sampleRate * durationMs / 1000);
-  const pcmBuffer = Buffer.alloc(numSamples * 2); // 16-bit = 2 bytes per sample
+  const pcmBuffer = Buffer.alloc(numSamples * 2);
   return buildWav(pcmBuffer, sampleRate);
 }
 
@@ -105,24 +96,16 @@ function extractPcm(wavBuffer) {
 }
 
 // ── Core TTS function ──────────────────────────────────────────────────────
-async function callTTS({ text, style, apiKey, voiceAudioBase64, speed, pitch, volume }) {
+async function callTTS({ text, apiKey, speed, pitch, volume }) {
   const endpoint = process.env.MIMO_API_ENDPOINT || 'https://api.xiaomimimo.com/v1/chat/completions';
   const model = process.env.MIMO_TTS_MODEL || 'mimo-v2-audio-tts';
 
-  const content = style ? `<style>${style}</style>${text}` : text;
-
   const body = {
     model,
-    messages: [{ role: 'assistant', content }],
+    messages: [{ role: 'assistant', content: text }],
+    audio: { format: 'wav', voice: 'mimo_default' },
   };
 
-  if (voiceAudioBase64) {
-    body.audio = { format: 'wav', voice_audio: { format: 'wav', data: voiceAudioBase64 } };
-  } else {
-    body.audio = { format: 'wav', voice: 'mimo_default' };
-  }
-
-  // Pass audio params if provided
   if (speed && speed !== 1) body.audio.speed = speed;
   if (pitch && pitch !== 0) body.audio.pitch = pitch;
   if (volume && volume !== 100) body.audio.volume = volume;
@@ -169,68 +152,26 @@ async function callTTS({ text, style, apiKey, voiceAudioBase64, speed, pitch, vo
   return buildWav(raw);
 }
 
-// ── Parse per-line bracket tags: [男声][鸣人][愤怒][快速][停顿500ms] text... ──
-function parseLineTags(line) {
-  const tags = [];
-  let pauseMs = 0;
-  let rest = line.trimStart();
-  // Match leading [tag] groups
-  const re = /^\[([^\]]+)\]\s*/;
-  let m;
-  while ((m = rest.match(re))) {
-    const tag = m[1].trim();
-    // Check if it's a pause tag: [停顿500ms] [pause500ms] etc.
-    const pauseMatch = tag.match(/^(?:停顿|pause)\s*(\d+)\s*(?:ms|毫秒)?$/i);
-    if (pauseMatch) {
-      pauseMs = parseInt(pauseMatch[1]);
-    } else {
-      tags.push(tag);
-    }
-    rest = rest.slice(m[0].length);
-  }
-  return { tags, pauseMs, text: rest.trim() };
-}
+// ── Multi-line with pause between segments ─────────────────────────────────
+async function callTTSWithPause({ text, apiKey, pauseMs, speed, pitch, volume }) {
+  const lines = text.split(/\n/).filter(s => s.trim().length > 0);
 
-// ── Paragraph pause: synthesize segments with silence between ───────────────
-// Supports per-line bracket tags that override the global style
-async function callTTSWithPause({ text, style, apiKey, voiceAudioBase64, pauseMs, speed, pitch, volume }) {
-  const rawLines = text.split(/\n/).filter(s => s.trim().length > 0);
-
-  if (rawLines.length <= 1 && !rawLines[0]?.trim().startsWith('[')) {
-    return callTTS({ text, style, apiKey, voiceAudioBase64, speed, pitch, volume });
+  if (lines.length <= 1) {
+    return callTTS({ text, apiKey, speed, pitch, volume });
   }
 
-  const silenceWav = buildSilenceWav(pauseMs);
-  const silencePcm = extractPcm(silenceWav);
+  const silencePcm = extractPcm(buildSilenceWav(pauseMs));
   const parts = [];
 
-  for (let i = 0; i < rawLines.length; i++) {
-    const line = rawLines[i].trim();
-    const { tags, pauseMs: linePause, text: lineText } = parseLineTags(line);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
 
-    if (!lineText && tags.length === 0) continue;
-
-    // Per-line style: if tags present, join them as style override
-    const lineStyle = tags.length > 0 ? tags.join(' ') : style;
-
-    const wav = await callTTS({
-      text: lineText || line, // fallback: if no text after tags, use raw line
-      style: lineStyle,
-      apiKey,
-      voiceAudioBase64: voiceAudioBase64,
-      speed,
-      pitch,
-      volume,
-    });
+    const wav = await callTTS({ text: line, apiKey, speed, pitch, volume });
     parts.push(extractPcm(wav));
 
-    if (i < rawLines.length - 1) {
-      // Use per-line pause if set, otherwise use global pauseMs
-      const gapMs = linePause > 0 ? linePause : pauseMs;
-      if (gapMs > 0) {
-        const gapSilence = buildSilenceWav(gapMs);
-        parts.push(extractPcm(gapSilence));
-      }
+    if (i < lines.length - 1 && pauseMs > 0) {
+      parts.push(silencePcm);
     }
   }
 
@@ -267,23 +208,105 @@ function convertToMp3(wavBuffer) {
   }
 }
 
-// ── Resolve singing lyrics ─────────────────────────────────────────────────
-function resolveLyrics(text) {
-  if (text.startsWith('LYRICS:')) {
-    return text.slice(7);
+// ── Proofread endpoint (use LLM to check text before TTS) ──────────────────
+app.post('/api/proofread', async (req, res) => {
+  try {
+    const { text, apiKey: bodyApiKey } = req.body;
+
+    if (!text || typeof text !== 'string' || text.trim().length === 0) {
+      return res.status(400).json({ error: 'text is required' });
+    }
+    if (text.length > 10000) {
+      return res.status(400).json({ error: 'text too long (max 10000 chars)' });
+    }
+
+    const apiKey = (bodyApiKey && bodyApiKey.trim()) || getApiKey();
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API Key 未配置，请在页面输入 MiMo API Key' });
+    }
+
+    const endpoint = process.env.MIMO_API_ENDPOINT || 'https://api.xiaomimimo.com/v1/chat/completions';
+    const model = process.env.MIMO_PROOFREAD_MODEL || 'mimo-v2-pro';
+
+    const prompt = `你是一个中文文本校对专家。请检查以下文本，找出以下问题：
+1. 错别字（用字错误）
+2. 多音字误用（读音/语境不匹配）
+3. 重复字词（连续重复或无意义重复）
+4. 语句不通顺（语法错误、搭配不当）
+
+要求：
+- 只返回 JSON，不要输出任何其他内容
+- JSON 格式：{"issues":[{"type":"错别字|多音字|重复|不通顺","position":"出错位置","original":"原文","suggestion":"建议修改","reason":"原因"}],"summary":"总体评价"}
+- 如果没有问题，issues 数组为空
+- 只指出明确的问题，不要过度修改
+
+待校对文本：
+${text.trim()}`;
+
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+      }),
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => '');
+      let errMsg = `API returned HTTP ${resp.status}`;
+      try {
+        const errJson = JSON.parse(errText);
+        if (errJson.error) {
+          errMsg = typeof errJson.error === 'string' ? errJson.error : JSON.stringify(errJson.error);
+        }
+      } catch {}
+      const error = new Error(errMsg);
+      error.httpStatus = resp.status;
+      throw error;
+    }
+
+    const data = await resp.json();
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error('Unexpected API response: no content found');
+    }
+
+    // Parse JSON from model response (may have markdown code fences)
+    let result;
+    try {
+      const jsonStr = content.replace(/```json?\s*/g, '').replace(/```/g, '').trim();
+      result = JSON.parse(jsonStr);
+    } catch {
+      // Fallback: return raw text as summary
+      result = { issues: [], summary: content };
+    }
+
+    return res.json({ success: true, ...result });
+  } catch (err) {
+    console.error('Proofread error:', err);
+    let userMsg = err.message;
+    const status = err.httpStatus;
+    if (status === 402 || userMsg.includes('insufficient_balance') || userMsg.includes('Insufficient')) {
+      userMsg = '❌ MiMo 账号余额不足，请前往 xiaomimimo.com 充值后重试';
+    } else if (status === 401 || userMsg.includes('Unauthorized') || userMsg.includes('invalid')) {
+      userMsg = '❌ API Key 无效，请检查输入是否正确';
+    } else if (status === 429 || userMsg.includes('rate')) {
+      userMsg = '❌ 请求过于频繁，请稍后重试';
+    }
+    return res.status(500).json({ error: userMsg });
   }
-  if (singDict[text]) return singDict[text];
-  for (const [key, lyrics] of Object.entries(singDict)) {
-    if (key.includes(text) || text.includes(key)) return lyrics;
-  }
-  return null;
-}
+});
 
 // ── TTS endpoint ───────────────────────────────────────────────────────────
 app.post('/api/tts', async (req, res) => {
   try {
     const {
-      text, style, voiceAudioBase64,
+      text,
       apiKey: bodyApiKey,
       speed, pitch, volume,
       pauseMs,
@@ -302,34 +325,21 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'API Key 未配置，请在页面输入 MiMo API Key' });
     }
 
-    let finalText = text.trim();
-    let finalStyle = style;
-    if (style === '唱歌') {
-      const lyrics = resolveLyrics(finalText);
-      if (lyrics) finalText = lyrics;
-    }
-
+    const finalText = text.trim();
     const id = crypto.randomUUID();
-    const voiceB64 = voiceAudioBase64 || null;
     const pause = Math.max(0, Math.min(5000, parseInt(pauseMs) || 0));
     const outFormat = format === 'mp3' ? 'mp3' : 'wav';
 
-    // Detect multi-role: any line starting with [tag]
-    const hasMultiRole = finalText.split('\n').some(l => /^\s*\[/.test(l));
-
     let wavBuffer;
     try {
-      if (pause > 0 || hasMultiRole) {
+      if (pause > 0) {
         wavBuffer = await callTTSWithPause({
-          text: finalText, style, apiKey,
-          voiceAudioBase64: voiceB64,
-          pauseMs: pause,
+          text: finalText, apiKey, pauseMs: pause,
           speed, pitch, volume,
         });
       } else {
         wavBuffer = await callTTS({
-          text: finalText, style, apiKey,
-          voiceAudioBase64: voiceB64,
+          text: finalText, apiKey,
           speed, pitch, volume,
         });
       }
@@ -350,7 +360,6 @@ app.post('/api/tts', async (req, res) => {
       return res.status(500).json({ error: 'TTS returned empty audio' });
     }
 
-    // Convert to MP3 if requested
     let finalBuffer = wavBuffer;
     let ext = 'wav';
     let mimeType = 'audio/wav';
@@ -362,7 +371,6 @@ app.post('/api/tts', async (req, res) => {
         mimeType = 'audio/mpeg';
       } catch (err) {
         console.error('MP3 conversion failed:', err.message);
-        // Fall back to WAV
       }
     }
 
@@ -381,5 +389,5 @@ app.post('/api/tts', async (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🎙️  MiMo TTS Web listening on http://localhost:${PORT}`);
+  console.log(`🎙️  MiMo TTS Lite listening on http://localhost:${PORT}`);
 });
