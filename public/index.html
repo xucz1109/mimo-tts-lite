@@ -6,20 +6,24 @@
   <title>MiMo TTS — 文字转语音</title>
   <style>
     :root {
-      --bg: #0a0a10;
-      --surface: #13131f;
-      --card: #1a1a2a;
-      --border: #2a2a40;
-      --text: #e8e8f4;
-      --muted: #7777aa;
-      --accent: #7c5cfc;
-      --accent2: #b68afe;
-      --accent-glow: rgba(124,92,252,0.15);
-      --danger: #ff4466;
-      --success: #34d399;
-      --warning: #fbbf24;
-      --radius: 14px;
+      --bg: #f5f6fa;
+      --surface: #ffffff;
+      --card: #ffffff;
+      --border: #e2e5f1;
+      --text: #1a1a2e;
+      --muted: #7b7f9e;
+      --accent: #6c5ce7;
+      --accent2: #a29bfe;
+      --accent-hover: #5a4bd1;
+      --accent-glow: rgba(108,92,231,0.12);
+      --accent-light: #ede9fc;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --radius: 12px;
       --radius-sm: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -29,76 +33,74 @@
       min-height: 100vh;
     }
 
-    /* ── Layout ── */
-    .app { max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
-
     /* ── Header ── */
     .header {
-      text-align: center;
-      padding: 40px 0 24px;
+      background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #74b9ff 100%);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(108,92,231,0.25);
     }
-    .header .logo {
-      font-size: 2.4rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 4px;
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+    .header-badges { display: flex; gap: 6px; }
+    .header-badge {
+      font-size: 0.68rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
     }
-    .header .sub { color: var(--muted); font-size: 0.95rem; }
-    .header .badges { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-    .badge {
-      display: inline-block; font-size: 0.72rem; font-weight: 600;
-      padding: 3px 10px; border-radius: 20px;
-      background: var(--card); border: 1px solid var(--border); color: var(--muted);
-    }
-    .badge.accent { background: var(--accent-glow); border-color: var(--accent); color: var(--accent2); }
-
-    /* ── Tabs ── */
-    .tabs {
-      display: flex; gap: 4px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 4px;
-      margin-bottom: 24px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px 0;
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 0.9rem;
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .header-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 0.82rem;
       font-weight: 600;
-      border-radius: var(--radius-sm);
+      padding: 6px 16px;
+      border-radius: 20px;
       cursor: pointer;
       transition: all 0.2s;
+      backdrop-filter: blur(4px);
     }
-    .tab-btn:hover { color: var(--text); background: var(--card); }
-    .tab-btn.active {
-      color: #fff;
-      background: var(--accent);
-      box-shadow: 0 2px 12px rgba(124,92,252,0.3);
+    .header-btn:hover { background: rgba(255,255,255,0.35); }
+    .header-btn.active { background: #fff; color: var(--accent); }
+
+    /* ── Main Layout ── */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      min-height: calc(100vh - 64px);
     }
 
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    /* ── Left Column ── */
+    .left-col { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── Right Column ── */
+    .right-col { display: flex; flex-direction: column; gap: 16px; }
 
     /* ── Card ── */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
     }
     .card-title {
-      font-size: 1rem; font-weight: 700; margin-bottom: 16px;
+      font-size: 0.92rem; font-weight: 700; margin-bottom: 14px;
       display: flex; align-items: center; gap: 8px;
+      color: var(--text);
     }
-    .card-title .icon { font-size: 1.2rem; }
+    .card-title .icon { font-size: 1.1rem; }
+
+    /* ── Collapsible ── */
     .card-title.collapsible {
       cursor: pointer;
       user-select: none;
@@ -107,67 +109,185 @@
     }
     .card-title.collapsible .chevron {
       margin-left: auto;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       transition: transform 0.25s;
       color: var(--muted);
     }
     .card-title.collapsible.open .chevron { transform: rotate(180deg); }
-    .card-title.collapsible.open { margin-bottom: 16px; }
+    .card-title.collapsible.open { margin-bottom: 14px; }
     .collapsible-body {
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.35s ease, opacity 0.25s ease;
       opacity: 0;
     }
-    .collapsible-body.open {
-      max-height: 2000px;
-      opacity: 1;
+    .collapsible-body.open { max-height: 2000px; opacity: 1; }
+
+    /* ── Result / History Area (top-left) ── */
+    .result-history-area {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
-    /* ── Form ── */
-    label {
-      display: block; font-size: 0.8rem; font-weight: 600;
-      color: var(--muted); margin-bottom: 6px;
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    textarea, input[type="text"] {
+    /* Result section */
+    .result-section { padding: 20px; border-bottom: 1px solid var(--border); }
+    .result-section .card-title { margin-bottom: 12px; }
+    .audio-player {
       width: 100%;
-      background: var(--surface);
+      margin: 8px 0;
+      border-radius: var(--radius-sm);
+      height: 40px;
+    }
+    .result-empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .result-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .meta-info {
+      display: flex; gap: 14px; margin-top: 8px;
+      font-size: 0.76rem; color: var(--muted);
+    }
+
+    /* History section */
+    .history-section { padding: 16px 20px; }
+    .history-section .card-title { margin-bottom: 10px; font-size: 0.85rem; }
+    .history-list { max-height: 200px; overflow-y: auto; }
+    .history-list::-webkit-scrollbar { width: 4px; }
+    .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .history-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 0.82rem;
+    }
+    .history-item:hover { background: var(--accent-light); }
+    .history-item .hist-text {
+      flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      color: var(--text);
+    }
+    .history-item .hist-style { font-size: 0.72rem; color: var(--accent2); }
+    .history-item .hist-time { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+    .history-item .hist-play {
+      background: none; border: none; color: var(--accent);
+      cursor: pointer; font-size: 1rem; padding: 2px;
+    }
+    .history-item .hist-del {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 0.85rem; padding: 2px;
+    }
+    .history-item .hist-del:hover { color: var(--danger); }
+    .history-empty {
+      text-align: center; padding: 16px 0; color: var(--muted); font-size: 0.82rem;
+    }
+    .history-clear-btn {
+      text-align: center; margin-top: 8px;
+    }
+
+    /* ── Text Input Area ── */
+    .text-area-card { flex: 1; display: flex; flex-direction: column; }
+    .text-area-card .card { flex: 1; display: flex; flex-direction: column; }
+    textarea {
+      width: 100%;
+      flex: 1;
+      min-height: 200px;
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text);
-      font-size: 1rem; line-height: 1.6;
+      font-size: 0.95rem; line-height: 1.7;
       padding: 14px;
       font-family: inherit;
       transition: border-color 0.2s;
+      resize: none;
     }
-    textarea { min-height: 120px; resize: vertical; }
-    textarea:focus, input[type="text"]:focus {
+    textarea:focus {
       outline: none; border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-glow);
     }
-    textarea::placeholder, input::placeholder { color: #444460; }
-
+    textarea::placeholder { color: #b0b3c5; }
     .char-count {
-      text-align: right; font-size: 0.78rem; color: var(--muted); margin-top: 4px;
+      text-align: right; font-size: 0.76rem; color: var(--muted); margin-top: 6px;
     }
 
-    /* ── Style Grid ── */
-    .style-section { margin-bottom: 16px; }
-    .style-section-title {
-      font-size: 0.8rem; font-weight: 600; color: var(--muted);
-      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    /* ── Generate Button Bar ── */
+    .generate-bar {
+      display: flex; gap: 10px;
+      margin-top: 12px;
     }
-    .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip {
-      padding: 6px 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      font-size: 0.82rem;
-      color: var(--muted);
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.95rem; font-weight: 700;
+      border: none; border-radius: var(--radius-sm);
+      padding: 12px 24px;
       cursor: pointer;
       transition: all 0.2s;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 16px rgba(108,92,231,0.3);
+      transform: translateY(-1px);
+    }
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-full { width: 100%; flex: 1; }
+    .btn-sm {
+      padding: 7px 14px; font-size: 0.82rem; font-weight: 600;
+    }
+    .btn-outline {
+      background: transparent; border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-outline:hover { background: var(--accent-light); border-color: var(--accent); }
+
+    /* ── Form Elements ── */
+    label {
+      display: block; font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.88rem;
+      padding: 10px 12px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    input::placeholder { color: #b0b3c5; }
+
+    /* ── Chip Selection ── */
+    .style-section { margin-bottom: 12px; }
+    .style-section-title {
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      margin-bottom: 6px; display: flex; align-items: center; gap: 4px;
+    }
+    .chip-group { display: flex; flex-wrap: wrap; gap: 5px; }
+    .chip {
+      padding: 5px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
       user-select: none;
     }
     .chip:hover { border-color: var(--accent); color: var(--text); }
@@ -175,14 +295,92 @@
       background: var(--accent);
       border-color: var(--accent);
       color: #fff;
-      box-shadow: 0 2px 8px rgba(124,92,252,0.25);
+      box-shadow: 0 2px 8px rgba(108,92,231,0.2);
+    }
+
+    /* ── Slider ── */
+    .slider-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .slider-row label {
+      min-width: 52px; margin-bottom: 0; font-size: 0.78rem; color: var(--muted);
+      flex-shrink: 0;
+    }
+    .slider-row input[type="range"] {
+      flex: 1; height: 4px; -webkit-appearance: none; appearance: none;
+      background: var(--border); border-radius: 2px; outline: none;
+    }
+    .slider-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      background: var(--accent); border-radius: 50%; cursor: pointer;
+      box-shadow: 0 1px 4px rgba(108,92,231,0.3);
+    }
+    .slider-row input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      background: var(--accent); border-radius: 50%; cursor: pointer; border: none;
+    }
+    .slider-val {
+      min-width: 42px; text-align: right; font-size: 0.78rem; color: var(--accent);
+      font-variant-numeric: tabular-nums; flex-shrink: 0;
+    }
+    .slider-insert-btn {
+      width: 24px; height: 24px;
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      padding: 0;
+    }
+    .slider-insert-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ── Toggle Switch ── */
+    .toggle-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px; font-size: 0.82rem;
+    }
+    .toggle-switch {
+      position: relative; width: 34px; height: 18px;
+      background: var(--border); border-radius: 9px; cursor: pointer;
+      transition: background 0.2s; flex-shrink: 0;
+    }
+    .toggle-switch.on { background: var(--accent); }
+    .toggle-switch::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      background: #fff; border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-switch.on::after { transform: translateX(16px); }
+
+    /* ── Format pills ── */
+    .format-group { display: flex; gap: 5px; margin-bottom: 12px; }
+    .format-pill {
+      padding: 5px 14px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 16px; font-size: 0.78rem; color: var(--muted); cursor: pointer;
+      transition: all 0.15s; user-select: none;
+    }
+    .format-pill:hover { border-color: var(--accent); color: var(--text); }
+    .format-pill.active {
+      background: var(--accent); border-color: var(--accent); color: #fff;
     }
 
     /* ── Voice Clone ── */
     .file-upload {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 16px;
-      background: var(--surface);
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg);
       border: 1px dashed var(--border);
       border-radius: var(--radius-sm);
       cursor: pointer;
@@ -190,530 +388,500 @@
     }
     .file-upload:hover { border-color: var(--accent); }
     .file-upload input { display: none; }
-    .file-upload .icon { font-size: 1.5rem; }
+    .file-upload .icon { font-size: 1.3rem; }
     .file-upload .info { flex: 1; }
-    .file-upload .name { font-size: 0.85rem; color: var(--text); }
-    .file-upload .hint { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-    .file-upload .remove-btn {
-      background: none; border: none; color: var(--danger);
-      cursor: pointer; font-size: 1.1rem; padding: 4px;
-    }
+    .file-upload .name { font-size: 0.82rem; color: var(--text); }
+    .file-upload .hint { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
 
-    /* ── Normalize ── */
-    .normalize-bar {
-      display: flex; align-items: center; gap: 10px;
-      margin-top: 12px; padding: 8px 12px;
-      background: #1a1a30;
-      border-radius: var(--radius-sm);
-      font-size: 0.8rem;
-    }
-    .normalize-bar label { margin-bottom: 0; font-size: 0.75rem; }
-    .toggle-switch {
-      position: relative; width: 36px; height: 20px;
-      background: var(--border); border-radius: 10px; cursor: pointer;
-      transition: background 0.2s;
-    }
-    .toggle-switch.on { background: var(--accent); }
-    .toggle-switch::after {
-      content: ''; position: absolute;
-      top: 2px; left: 2px;
-      width: 16px; height: 16px;
-      background: #fff; border-radius: 50%;
-      transition: transform 0.2s;
-    }
-    .toggle-switch.on::after { transform: translateX(16px); }
-
-    /* ── Slider ── */
-    .slider-row {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 12px;
-    }
-    .slider-row label {
-      min-width: 48px; margin-bottom: 0; font-size: 0.8rem; color: var(--muted);
-      flex-shrink: 0;
-    }
-    .slider-row input[type="range"] {
-      flex: 1; height: 6px; -webkit-appearance: none; appearance: none;
-      background: var(--border); border-radius: 3px; outline: none;
-    }
-    .slider-row input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 16px; height: 16px;
-      background: var(--accent); border-radius: 50%; cursor: pointer;
-      box-shadow: 0 1px 4px rgba(124,92,252,0.4);
-    }
-    .slider-row input[type="range"]::-moz-range-thumb {
-      width: 16px; height: 16px;
-      background: var(--accent); border-radius: 50%; cursor: pointer; border: none;
-    }
-    .slider-val {
-      min-width: 48px; text-align: right; font-size: 0.8rem; color: var(--accent2);
-      font-variant-numeric: tabular-nums; flex-shrink: 0;
-    }
-    .slider-reset {
-      background: none; border: none; color: var(--muted); cursor: pointer;
-      font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
-    }
-    .slider-reset:hover { color: var(--accent); }
-
-    /* ── Format pills ── */
-    .format-group { display: flex; gap: 6px; margin-bottom: 14px; }
-    .format-pill {
-      padding: 6px 16px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 20px; font-size: 0.82rem; color: var(--muted); cursor: pointer;
-      transition: all 0.2s; user-select: none;
-    }
-    .format-pill:hover { border-color: var(--accent); color: var(--text); }
-    .format-pill.active {
-      background: var(--accent); border-color: var(--accent); color: #fff;
-    }
-
-    /* ── Button ── */
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      gap: 8px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 1rem; font-weight: 700;
-      border: none; border-radius: var(--radius-sm);
-      padding: 14px 28px;
-      cursor: pointer;
-      transition: all 0.2s;
-      width: 100%;
-    }
-    .btn:hover:not(:disabled) {
-      background: var(--accent-hover);
-      box-shadow: 0 4px 20px rgba(124,92,252,0.3);
-      transform: translateY(-1px);
-    }
-    .btn:active:not(:disabled) { transform: scale(0.98); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-sm {
-      padding: 8px 16px; font-size: 0.85rem; width: auto; font-weight: 600;
-    }
-    .btn-outline {
-      background: transparent; border: 1px solid var(--border); color: var(--text);
-    }
-    .btn-outline:hover { background: var(--card); border-color: var(--accent); }
-
-    /* ── Result ── */
-    .result { display: none; }
-    .result.show { display: block; }
-    .audio-player { width: 100%; margin: 12px 0; border-radius: var(--radius-sm); }
-    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-    .result-actions .btn-sm { flex: 1; min-width: 100px; }
-
-    .meta-info {
-      display: flex; gap: 16px; margin-top: 12px;
-      font-size: 0.78rem; color: var(--muted);
-    }
-
-    /* ── History ── */
-    .history-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .history-item:hover { border-color: var(--accent); }
-    .history-item .hist-icon { font-size: 1.3rem; }
-    .history-item .hist-text { flex: 1; font-size: 0.85rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .history-item .hist-style { font-size: 0.75rem; color: var(--accent2); margin-top: 2px; }
-    .history-item .hist-time { font-size: 0.72rem; color: var(--muted); }
-    .history-item .hist-play { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1.2rem; }
-    .history-item .hist-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
-    .history-item .hist-del:hover { color: var(--danger); }
+    /* ── API Key ── */
+    .api-key-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .api-key-row input { flex: 1; }
+    .api-key-status { font-size: 0.72rem; color: var(--muted); margin-bottom: 12px; }
 
     /* ── Loading ── */
-    .loading { display: none; text-align: center; padding: 32px; }
+    .loading { display: none; text-align: center; padding: 24px; }
     .loading.show { display: block; }
     .spinner {
-      width: 40px; height: 40px;
+      width: 32px; height: 32px;
       border: 3px solid var(--border); border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
+      margin: 0 auto 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading p { color: var(--muted); font-size: 0.9rem; }
+    .loading p { color: var(--muted); font-size: 0.85rem; }
 
     /* ── Error ── */
     .error {
       display: none;
-      background: #2a1020;
+      background: #fdf0ef;
       border: 1px solid var(--danger);
       border-radius: var(--radius-sm);
-      padding: 12px 16px;
+      padding: 10px 14px;
       color: var(--danger);
-      font-size: 0.88rem;
-      margin-top: 12px;
+      font-size: 0.82rem;
+      margin-top: 10px;
     }
     .error.show { display: block; }
 
-    /* ── API Doc ── */
-    .doc-section { margin-bottom: 24px; }
-    .doc-section h3 {
-      font-size: 0.95rem; font-weight: 700; margin-bottom: 10px;
-      color: var(--text);
+    /* ── Role Tags (quick insert) ── */
+    .role-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.72rem;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .role-tag:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ── Line Preview ── */
+    .line-preview {
+      margin-top: 6px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      max-height: 120px;
+      overflow-y: auto;
+      display: none;
+    }
+    .line-preview.show { display: block; }
+    .line-preview-item {
       display: flex; align-items: center; gap: 6px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--border);
     }
-    .doc-table {
-      width: 100%; border-collapse: collapse;
-      font-size: 0.82rem;
+    .line-preview-item:last-child { border-bottom: none; }
+    .line-preview-tag {
+      display: inline-block;
+      padding: 1px 6px;
+      background: var(--accent-light);
+      border-radius: 8px;
+      font-size: 0.68rem;
+      color: var(--accent);
+      white-space: nowrap;
     }
+    .line-preview-text {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Sing Panel ── */
+    #singPanel { display: none; margin-top: 10px; }
+    #singPanel textarea {
+      min-height: 70px; resize: vertical; margin-top: 6px;
+    }
+
+    /* ── API Docs Overlay ── */
+    .docs-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+    .docs-overlay.show { display: flex; }
+    .docs-content {
+      background: var(--card);
+      border-radius: var(--radius);
+      max-width: 800px; width: 100%;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .docs-content .card-title { font-size: 1.1rem; margin-bottom: 18px; }
+    .doc-section { margin-bottom: 20px; }
+    .doc-section h3 {
+      font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; color: var(--text);
+    }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
     .doc-table th {
-      text-align: left; padding: 8px 12px;
-      background: var(--surface); color: var(--muted);
+      text-align: left; padding: 7px 10px;
+      background: var(--bg); color: var(--muted);
       font-weight: 600; border-bottom: 1px solid var(--border);
     }
     .doc-table td {
-      padding: 8px 12px; border-bottom: 1px solid var(--border);
-      color: var(--text);
+      padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text);
     }
     .doc-table tr:last-child td { border-bottom: none; }
-    .doc-table code {
-      background: var(--surface); padding: 2px 6px;
-      border-radius: 4px; font-size: 0.78rem; color: var(--accent2);
+    .doc-table code, pre code {
+      background: var(--bg); padding: 2px 5px;
+      border-radius: 4px; font-size: 0.76rem; color: var(--accent);
     }
     pre {
-      background: var(--surface);
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 16px;
+      padding: 14px;
       overflow-x: auto;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       line-height: 1.6;
       color: var(--text);
-      margin: 10px 0;
+      margin: 8px 0;
     }
-    pre code { background: none; padding: 0; }
-    .code-block {
-      position: relative;
-    }
+    .code-block { position: relative; }
     .copy-btn {
-      position: absolute; top: 8px; right: 8px;
+      position: absolute; top: 6px; right: 6px;
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 6px; padding: 4px 10px;
-      font-size: 0.72rem; color: var(--muted); cursor: pointer;
+      border-radius: 6px; padding: 3px 8px;
+      font-size: 0.7rem; color: var(--muted); cursor: pointer;
       transition: all 0.2s;
     }
     .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
-
-    /* ── Footer ── */
-    .footer {
-      text-align: center; color: var(--muted); font-size: 0.78rem;
-      margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);
+    .docs-close {
+      float: right;
+      background: none; border: none;
+      font-size: 1.3rem; cursor: pointer;
+      color: var(--muted); padding: 4px;
     }
-    .footer a { color: var(--accent); text-decoration: none; }
+    .docs-close:hover { color: var(--text); }
 
     /* ── Responsive ── */
-    @media (max-width: 600px) {
-      .app { padding: 16px 12px 60px; }
-      .header .logo { font-size: 1.8rem; }
-      .card { padding: 18px; }
-      .tabs { overflow-x: auto; }
-      .tab-btn { white-space: nowrap; font-size: 0.82rem; padding: 8px 4px; }
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+        padding: 16px;
+      }
+      .header { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+      .header-badges { display: none; }
     }
   </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- Header -->
-  <div class="header">
-    <div class="logo">🎙️ MiMo TTS</div>
-    <div class="sub">小米 MiMo v2 大模型 · 文字转语音</div>
-    <div class="badges">
-      <span class="badge accent">mimo-v2-audio-tts</span>
-      <span class="badge">24kHz WAV</span>
-      <span class="badge">语音克隆</span>
-      <span class="badge">16+ 风格</span>
+<!-- ══════════ Header ══════════ -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">🎙️ MiMo TTS</div>
+    <div class="header-badges">
+      <span class="header-badge">mimo-v2-audio-tts</span>
+      <span class="header-badge">24kHz WAV</span>
+      <span class="header-badge">语音克隆</span>
     </div>
   </div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('tts')">🎤 语音合成</button>
-    <button class="tab-btn" onclick="switchTab('history')">📜 历史记录</button>
-    <button class="tab-btn" onclick="switchTab('docs')">📖 API 文档</button>
+  <div class="header-right">
+    <button class="header-btn active" id="btnTTS" onclick="showMain()">🎤 语音合成</button>
+    <button class="header-btn" id="btnDocs" onclick="toggleDocs()">📖 API 文档</button>
   </div>
+</div>
 
-  <!-- ══════════ Tab: TTS ══════════ -->
-  <div class="tab-panel active" id="panel-tts">
+<!-- ══════════ Main Layout ══════════ -->
+<div class="main-layout">
 
-    <!-- API Key -->
-    <div class="card" id="apiKeyCard">
-      <div class="card-title"><span class="icon">🔑</span> API Key 配置</div>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <input type="password" id="apiKeyInput" placeholder="输入你的 MiMo API Key (api-key)" style="flex:1;" autocomplete="off" />
-        <button class="btn btn-outline btn-sm" style="width:auto; white-space:nowrap;" onclick="toggleKeyVisibility()">
-          <span id="keyEyeIcon">👁️</span>
-        </button>
-        <button class="btn btn-outline btn-sm" style="width:auto; white-space:nowrap; color:var(--accent); border-color:var(--accent);" onclick="testApiKey()">🔍 测试</button>
-        <button class="btn btn-sm" style="width:auto; white-space:nowrap;" onclick="saveApiKey()">保存</button>
+  <!-- ── Left Column ── -->
+  <div class="left-col">
+
+    <!-- Result & History -->
+    <div class="result-history-area">
+      <div class="result-section" id="resultSection">
+        <div class="card-title"><span class="icon">🎧</span> 生成结果</div>
+        <div id="resultEmpty" class="result-empty">
+          生成的语音将在这里播放
+        </div>
+        <div id="resultContent" style="display:none;">
+          <audio id="audioPlayer" class="audio-player" controls></audio>
+          <div class="result-actions">
+            <button class="btn btn-outline btn-sm" onclick="playAgain()">🔄 重播</button>
+            <button class="btn btn-sm" onclick="download()">⬇️ 下载</button>
+            <button class="btn btn-outline btn-sm" onclick="copyAudioUrl()">🔗 复制链接</button>
+          </div>
+          <div class="meta-info">
+            <span id="metaSize"></span>
+            <span id="metaTime"></span>
+            <span id="metaStyle"></span>
+          </div>
+        </div>
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>正在生成语音，请稍候…</p>
+        </div>
+        <div class="error" id="errorMsg"></div>
       </div>
-      <div id="apiKeyStatus" style="font-size:0.78rem; margin-top:8px; color:var(--muted);">
-        API Key 随请求发送到后端用于调用 API，请在可信网络环境中使用
+
+      <div class="history-section">
+        <div class="card-title"><span class="icon">📜</span> 历史记录 <span style="font-size:0.76rem; color:var(--muted); font-weight:400; margin-left:auto;" id="historyCount">(0)</span></div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">暂无历史记录</div>
+        </div>
+        <div class="history-clear-btn" id="clearHistoryBtn" style="display:none;">
+          <button class="btn btn-outline btn-sm" onclick="clearHistory()">🗑️ 清空</button>
+        </div>
       </div>
     </div>
 
     <!-- Text Input -->
-    <div class="card">
-      <div class="card-title"><span class="icon">📝</span> 输入文本</div>
-      <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…&#10;&#10;示例：欢迎使用小米 MiMo 语音合成系统，我们支持多种风格的语音合成，包括方言、情绪调节、语速控制等。"></textarea>
-      <div class="char-count"><span id="charCount">0</span> / 10000</div>
+    <div class="text-area-card">
+      <div class="card" style="flex:1; display:flex; flex-direction:column;">
+        <div class="card-title"><span class="icon">📝</span> 输入文本
+          <span style="margin-left:auto; font-size:0.72rem; font-weight:400; color:var(--muted); cursor:pointer;" onclick="toggleRoleTip()">💡 多角色模式</span>
+        </div>
 
-      <div class="normalize-bar">
-        <div class="toggle-switch on" id="normalizeToggle" onclick="toggleNormalize()"></div>
-        <label style="font-size:0.8rem">自动文本规范化</label>
-        <span style="flex:1"></span>
-        <span style="font-size:0.75rem; color:var(--muted)">将数字、符号转为自然朗读格式</span>
+        <!-- Multi-role tip -->
+        <div id="roleTip" style="display:none; background:var(--accent-light); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; font-size:0.78rem; color:var(--text); line-height:1.7;">
+          <div style="font-weight:700; margin-bottom:4px;">🎭 多角色语音模式</div>
+          在每行开头用 <code style="background:var(--bg); padding:1px 5px; border-radius:3px; color:var(--accent);">[标签]</code> 指定该行的音色/风格，支持多个叠加：<br>
+          <div style="margin:6px 0; padding:6px 10px; background:var(--card); border-radius:6px; font-family:monospace; font-size:0.76rem;">
+            [男声][愤怒]你竟敢背叛我！<br>
+            [女声][温柔]没关系，我原谅你。<br>
+            [鸣人][快速]我要成为火影！
+          </div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--muted);">
+            标签自动作为该行的 style 参数，无标签的行使用右侧全局风格设置
+          </div>
+          <!-- Quick insert tags -->
+          <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:4px;">
+            <span class="role-tag" onclick="insertTag('[男声]')">男声</span>
+            <span class="role-tag" onclick="insertTag('[女声]')">女声</span>
+            <span class="role-tag" onclick="insertTag('[童声]')">童声</span>
+            <span class="role-tag" onclick="insertTag('[温柔]')">温柔</span>
+            <span class="role-tag" onclick="insertTag('[愤怒]')">愤怒</span>
+            <span class="role-tag" onclick="insertTag('[开心]')">开心</span>
+            <span class="role-tag" onclick="insertTag('[悲伤]')">悲伤</span>
+            <span class="role-tag" onclick="insertTag('[快速]')">快速</span>
+            <span class="role-tag" onclick="insertTag('[慢速]')">慢速</span>
+            <span class="role-tag" onclick="insertTag('[东北话]')">东北话</span>
+            <span class="role-tag" onclick="insertTag('[四川话]')">四川话</span>
+            <span class="role-tag" onclick="insertTag('[粤语]')">粤语</span>
+            <span class="role-tag" onclick="insertTag('[像个新闻主播]')">新闻主播</span>
+            <span class="role-tag" onclick="insertTag('[像个老师]')">老师</span>
+            <span class="role-tag" onclick="insertTag('[大声喊]')">大声喊</span>
+            <span class="role-tag" onclick="insertTag('[悄悄话]')">悄悄话</span>
+          </div>
+        </div>
+
+        <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…&#10;&#10;💡 多角色模式：在每行开头用 [标签] 指定音色&#10;[男声][愤怒]你竟敢背叛我！&#10;[女声][温柔]没关系，我原谅你。&#10;[鸣人][快速]我要成为火影！" style="flex:1; min-height:180px;"></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 10000</div>
+        <div class="line-preview" id="linePreview"></div>
+        <div class="generate-bar">
+          <button class="btn btn-full" id="generateBtn" onclick="generate()">
+            🎵 生成语音 <span style="font-size:0.76rem; font-weight:400; opacity:0.8;">Ctrl+Enter</span>
+          </button>
+          <button class="btn btn-outline" id="previewBtn" onclick="generate(true)" style="white-space:nowrap;">
+            🎧 试听
+          </button>
+          <button class="btn btn-outline" id="undoBtn" onclick="undoText()" title="撤销文本修改" style="white-space:nowrap; padding:12px 16px; position:relative;">
+            ↩️ 撤销
+            <span id="undoCount" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--accent); color:#fff; font-size:0.6rem; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700;"></span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Advanced Settings -->
+  </div>
+
+  <!-- ── Right Column: Settings ── -->
+  <div class="right-col">
+
+    <!-- API Key -->
     <div class="card">
-      <div class="card-title collapsible" onclick="toggleCollapse(this)"><span class="icon">⚙️</span> 高级设置 <span class="chevron">▼</span></div>
-      <div class="collapsible-body">
-
-        <!-- Preview mode toggle -->
-        <div class="normalize-bar" style="margin-bottom: 14px;">
-          <div class="toggle-switch" id="previewToggle" onclick="togglePreview()"></div>
-          <label style="font-size:0.8rem">试听模式</label>
-          <span style="flex:1"></span>
-          <span style="font-size:0.75rem; color:var(--muted)">仅转换前 50 字，节省额度</span>
-        </div>
-
-        <!-- Format selection -->
-        <label style="font-size:0.8rem; margin-bottom: 8px;">下载格式</label>
-        <div class="format-group">
-          <div class="format-pill active" data-fmt="wav" onclick="selectFormat(this)">WAV</div>
-          <div class="format-pill" data-fmt="mp3" onclick="selectFormat(this)">MP3</div>
-        </div>
-
-        <!-- Speed slider -->
-        <div class="slider-row">
-          <label>语速</label>
-          <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSliderVal('speedVal', this.value, 'x')" />
-          <span class="slider-val" id="speedVal">1.0x</span>
-          <button class="slider-reset" onclick="resetSlider('speedSlider', 'speedVal', '1.0', 'x')">重置</button>
-        </div>
-
-        <!-- Volume slider -->
-        <div class="slider-row">
-          <label>音量</label>
-          <input type="range" id="volumeSlider" min="0" max="200" step="5" value="100" oninput="updateSliderVal('volumeVal', this.value, '%')" />
-          <span class="slider-val" id="volumeVal">100%</span>
-          <button class="slider-reset" onclick="resetSlider('volumeSlider', 'volumeVal', '100', '%')">重置</button>
-        </div>
-
-        <!-- Pitch slider -->
-        <div class="slider-row">
-          <label>音高</label>
-          <input type="range" id="pitchSlider" min="-12" max="12" step="1" value="0" oninput="updateSliderVal('pitchVal', this.value, '')" />
-          <span class="slider-val" id="pitchVal">0</span>
-          <button class="slider-reset" onclick="resetSlider('pitchSlider', 'pitchVal', '0', '')">重置</button>
-        </div>
-
-        <!-- Pause slider -->
-        <div class="slider-row">
-          <label>段落停顿</label>
-          <input type="range" id="pauseSlider" min="0" max="3000" step="100" value="0" oninput="updateSliderVal('pauseVal', this.value, 'ms')" />
-          <span class="slider-val" id="pauseVal">0ms</span>
-          <button class="slider-reset" onclick="resetSlider('pauseSlider', 'pauseVal', '0', 'ms')">重置</button>
-        </div>
-        <span style="font-size:0.72rem; color:var(--muted); display:block; margin-top:-6px; margin-bottom:10px;">文本按换行分段，每段之间插入静音时长</span>
-
-      </div><!-- /collapsible-body -->
+      <div class="card-title"><span class="icon">🔑</span> API Key</div>
+      <div class="api-key-row">
+        <input type="password" id="apiKeyInput" placeholder="输入 MiMo API Key" autocomplete="off" />
+        <button class="btn btn-outline btn-sm" onclick="toggleKeyVisibility()" style="padding:8px 10px;">
+          <span id="keyEyeIcon">👁️</span>
+        </button>
+        <button class="btn btn-sm" onclick="saveApiKey()" style="white-space:nowrap;">保存</button>
+      </div>
+      <div class="api-key-status" id="apiKeyStatus">API Key 随请求发送到后端调用 API</div>
     </div>
 
-    <!-- Style Selection -->
+    <!-- Voice / Style Settings -->
     <div class="card">
-      <div class="card-title collapsible" onclick="toggleCollapse(this)"><span class="icon">🎨</span> 风格设置 <span class="chevron">▼</span></div>
-      <div class="collapsible-body">
+      <div class="card-title"><span class="icon">🎨</span> 音色与风格</div>
 
+      <!-- Emotion -->
       <div class="style-section">
         <div class="style-section-title">😊 情绪</div>
         <div class="chip-group" id="emotionChips">
           <div class="chip active" data-value="">默认</div>
-          <div class="chip" data-value="开心">😊 开心</div>
-          <div class="chip" data-value="悲伤">😢 悲伤</div>
-          <div class="chip" data-value="生气">😠 生气</div>
-          <div class="chip" data-value="平静">😌 平静</div>
-          <div class="chip" data-value="深情款款">💕 深情</div>
-          <div class="chip" data-value="慵懒 刚睡醒">😴 慵懒</div>
-          <div class="chip" data-value="撒娇 夹子音">🥰 撒娇</div>
+          <div class="chip" data-value="开心" data-insert="开心">😊 开心</div>
+          <div class="chip" data-value="悲伤" data-insert="悲伤">😢 悲伤</div>
+          <div class="chip" data-value="生气" data-insert="生气">😠 生气</div>
+          <div class="chip" data-value="平静" data-insert="平静">😌 平静</div>
+          <div class="chip" data-value="深情款款" data-insert="深情款款">💕 深情</div>
+          <div class="chip" data-value="慵懒 刚睡醒" data-insert="慵懒 刚睡醒">😴 慵懒</div>
+          <div class="chip" data-value="撒娇 夹子音" data-insert="撒娇 夹子音">🥰 撒娇</div>
         </div>
       </div>
 
-      <div class="style-section">
-        <div class="style-section-title">🏎️ 语速</div>
-        <div class="chip-group" id="speedChips">
-          <div class="chip active" data-value="">正常</div>
-          <div class="chip" data-value="语速慢">🐢 慢</div>
-          <div class="chip" data-value="语速快">🐇 快</div>
-          <div class="chip" data-value="清晰有力">📢 清晰有力</div>
-        </div>
-      </div>
-
+      <!-- Dialect -->
       <div class="style-section">
         <div class="style-section-title">🗺️ 方言</div>
         <div class="chip-group" id="dialectChips">
           <div class="chip active" data-value="">普通话</div>
-          <div class="chip" data-value="东北话">🌲 东北话</div>
-          <div class="chip" data-value="四川话">🌶️ 四川话</div>
-          <div class="chip" data-value="台湾腔">🧋 台湾腔</div>
-          <div class="chip" data-value="粤语">🥟 粤语</div>
+          <div class="chip" data-value="东北话" data-insert="东北话">🌲 东北</div>
+          <div class="chip" data-value="四川话" data-insert="四川话">🌶️ 四川</div>
+          <div class="chip" data-value="台湾腔" data-insert="台湾腔">🧋 台湾</div>
+          <div class="chip" data-value="粤语" data-insert="粤语">🥟 粤语</div>
         </div>
       </div>
 
+      <!-- Role -->
       <div class="style-section">
         <div class="style-section-title">🎭 角色</div>
         <div class="chip-group" id="roleChips">
           <div class="chip active" data-value="">默认</div>
-          <div class="chip" data-value="像个大将军">⚔️ 大将军</div>
-          <div class="chip" data-value="像个小孩">🧒 小孩</div>
-          <div class="chip" data-value="孙悟空">🐵 孙悟空</div>
-          <div class="chip" data-value="林黛玉">🌸 林黛玉</div>
-          <div class="chip" data-value="像个新闻主播">📺 新闻主播</div>
-          <div class="chip" data-value="像个老师">📚 老师</div>
+          <div class="chip" data-value="像个大将军" data-insert="像个大将军">⚔️ 将军</div>
+          <div class="chip" data-value="像个小孩" data-insert="像个小孩">🧒 小孩</div>
+          <div class="chip" data-value="孙悟空" data-insert="孙悟空">🐵 悟空</div>
+          <div class="chip" data-value="像个新闻主播" data-insert="像个新闻主播">📺 主播</div>
+          <div class="chip" data-value="像个老师" data-insert="像个老师">📚 老师</div>
         </div>
       </div>
 
+      <!-- Tone -->
       <div class="style-section">
         <div class="style-section-title">💬 语气</div>
         <div class="chip-group" id="toneChips">
           <div class="chip active" data-value="">自然</div>
-          <div class="chip" data-value="悄悄话">🤫 悄悄话</div>
-          <div class="chip" data-value="大声喊">📢 大声喊</div>
-          <div class="chip" data-value="神秘低语">🌙 神秘低语</div>
+          <div class="chip" data-value="悄悄话" data-insert="悄悄话">🤫 悄悄话</div>
+          <div class="chip" data-value="大声喊" data-insert="大声喊">📢 大声喊</div>
+          <div class="chip" data-value="清晰有力" data-insert="清晰有力">💪 有力</div>
         </div>
       </div>
 
+      <!-- Singing -->
       <div class="style-section">
         <div class="style-section-title">🎵 唱歌</div>
         <div class="chip-group" id="singChips">
-          <div class="chip" data-value="__sing_off__" style="display:none" onclick="toggleSing(false)">⏹️ 关闭</div>
           <div class="chip active" data-value="">关闭</div>
-          <div class="chip" data-value="__sing_on__" onclick="toggleSing(true)">🎤 开启唱歌模式</div>
+          <div class="chip" data-value="__sing_on__" onclick="toggleSing(true)">🎤 开启</div>
+          <div class="chip" data-value="__sing_off__" style="display:none" onclick="toggleSing(false)">⏹️ 关闭</div>
         </div>
       </div>
-
-      <!-- Singing mode: lyrics input -->
-      <div id="singPanel" style="display:none; margin-top: 16px;">
+      <div id="singPanel">
         <div class="style-section">
           <div class="style-section-title">🎶 歌词</div>
           <div class="chip-group" id="songChips">
-            <div class="chip active" data-value="">直接输入歌词</div>
+            <div class="chip active" data-value="">直接输入</div>
             <div class="chip" data-value="两只老虎">🐯 两只老虎</div>
             <div class="chip" data-value="小星星">⭐ 小星星</div>
             <div class="chip" data-value="生日快乐">🎂 生日快乐</div>
           </div>
         </div>
-        <textarea id="singInput" placeholder="输入歌词，或选择上方预置歌曲…&#10;&#10;两只老虎，两只老虎，跑得快，跑得快……" style="min-height: 80px; margin-top: 8px;"></textarea>
+        <textarea id="singInput" placeholder="输入歌词或选择预置歌曲…"></textarea>
       </div>
 
       <!-- Custom style -->
-      <div class="style-section" style="margin-top: 16px;">
-        <div class="style-section-title">✏️ 自定义风格描述（可选）</div>
-        <input type="text" id="customStyle" placeholder="如：语速慢 清晰 像个新闻主播，会覆盖上方选项" />
+      <div class="style-section" style="margin-top:8px;">
+        <div class="style-section-title">✏️ 自定义风格（覆盖上方选项）</div>
+        <input type="text" id="customStyle" placeholder="如：语速慢 清晰 像个新闻主播" />
+      </div>
+    </div>
+
+    <!-- Advanced Settings -->
+    <div class="card">
+      <div class="card-title"><span class="icon">⚙️</span> 参数调节</div>
+
+      <!-- Preview mode -->
+      <div class="toggle-row">
+        <div class="toggle-switch" id="previewToggle" onclick="togglePreview()"></div>
+        <span>试听模式（仅前50字）</span>
       </div>
 
-      </div><!-- /collapsible-body -->
+      <!-- Normalize -->
+      <div class="toggle-row">
+        <div class="toggle-switch on" id="normalizeToggle" onclick="toggleNormalize()"></div>
+        <span>自动文本规范化</span>
+      </div>
+
+      <!-- Format -->
+      <label>下载格式</label>
+      <div class="format-group">
+        <div class="format-pill active" data-fmt="wav" onclick="selectFormat(this)">WAV</div>
+        <div class="format-pill" data-fmt="mp3" onclick="selectFormat(this)">MP3</div>
+      </div>
+
+      <!-- Speed -->
+      <div class="slider-row">
+        <label>语速</label>
+        <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSliderVal('speedVal', this.value, 'x')" />
+        <span class="slider-val" id="speedVal">1.0x</span>
+        <button class="slider-insert-btn" onclick="insertSliderTag('speed')" title="插入到文本">＋</button>
+      </div>
+
+      <!-- Volume -->
+      <div class="slider-row">
+        <label>音量</label>
+        <input type="range" id="volumeSlider" min="0" max="200" step="5" value="100" oninput="updateSliderVal('volumeVal', this.value, '%')" />
+        <span class="slider-val" id="volumeVal">100%</span>
+        <button class="slider-insert-btn" onclick="insertSliderTag('volume')" title="插入到文本">＋</button>
+      </div>
+
+      <!-- Pitch -->
+      <div class="slider-row">
+        <label>音高</label>
+        <input type="range" id="pitchSlider" min="-12" max="12" step="1" value="0" oninput="updateSliderVal('pitchVal', this.value, '')" />
+        <span class="slider-val" id="pitchVal">0</span>
+        <button class="slider-insert-btn" onclick="insertSliderTag('pitch')" title="插入到文本">＋</button>
+      </div>
+
+      <!-- Pause -->
+      <div class="slider-row">
+        <label>停顿</label>
+        <input type="range" id="pauseSlider" min="0" max="3000" step="100" value="0" oninput="updateSliderVal('pauseVal', this.value, 'ms')" />
+        <span class="slider-val" id="pauseVal">0ms</span>
+        <button class="slider-insert-btn" onclick="insertSliderTag('pause')" title="插入到文本">＋</button>
+      </div>
+      <div style="font-size:0.7rem; color:var(--muted); margin-top:-4px;">点击 ＋ 插入到文本光标处，或作为段落间停顿</div>
     </div>
 
     <!-- Voice Clone -->
     <div class="card">
-      <div class="card-title collapsible" onclick="toggleCollapse(this)"><span class="icon">🎤</span> 语音克隆（可选） <span class="chevron">▼</span></div>
+      <div class="card-title collapsible" onclick="toggleCollapse(this)">
+        <span class="icon">🎤</span> 语音克隆 <span class="chevron">▼</span>
+      </div>
       <div class="collapsible-body">
-      <div class="file-upload" id="fileUpload" onclick="document.getElementById('voiceFile').click()">
-        <span class="icon">📁</span>
-        <div class="info">
-          <div class="name" id="fileName">点击上传音频文件</div>
-          <div class="hint">支持 WAV 格式，24kHz、16-bit、单声道，5~15 秒</div>
+        <div class="file-upload" onclick="document.getElementById('voiceFile').click()">
+          <span class="icon">📁</span>
+          <div class="info">
+            <div class="name" id="fileName">点击上传音频</div>
+            <div class="hint">WAV · 24kHz · 5~15 秒</div>
+          </div>
+          <input type="file" id="voiceFile" accept=".wav" onchange="handleVoiceFile(this)" />
         </div>
-        <input type="file" id="voiceFile" accept=".wav" onchange="handleVoiceFile(this)" />
-      </div>
-      <button class="remove-btn" id="removeVoiceBtn" style="display:none; margin-top: 8px; background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.82rem;" onclick="removeVoiceFile()">✕ 移除音频</button>
-      </div><!-- /collapsible-body -->
-    </div>
-
-    <!-- Generate Buttons -->
-    <div style="display: flex; gap: 10px; margin-bottom: 16px;">
-      <button class="btn" id="generateBtn" onclick="generate()" style="flex:1;">
-        🎵 生成语音
-        <span style="font-size:0.8rem; font-weight:400; opacity:0.8">（Ctrl+Enter）</span>
-      </button>
-      <button class="btn btn-outline" id="previewBtn" onclick="generate(true)" style="width:auto; padding:14px 20px; white-space:nowrap;">
-        🎧 试听
-      </button>
-    </div>
-
-    <!-- Error -->
-    <div class="error" id="errorMsg"></div>
-
-    <!-- Loading -->
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <p>正在生成语音，请稍候…</p>
-    </div>
-
-    <!-- Result -->
-    <div class="card result" id="result">
-      <div class="card-title"><span class="icon">🎧</span> 生成结果</div>
-      <audio id="audioPlayer" class="audio-player" controls></audio>
-      <div class="result-actions">
-        <button class="btn btn-outline btn-sm" onclick="playAgain()">🔄 重播</button>
-        <button class="btn btn-sm" onclick="download()">⬇️ 下载 WAV</button>
-      </div>
-      <div class="meta-info">
-        <span id="metaSize"></span>
-        <span id="metaTime"></span>
-        <span id="metaStyle"></span>
+        <button id="removeVoiceBtn" style="display:none; margin-top:6px; background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.78rem;" onclick="removeVoiceFile()">✕ 移除音频</button>
       </div>
     </div>
+
   </div>
+</div>
 
-  <!-- ══════════ Tab: History ══════════ -->
-  <div class="tab-panel" id="panel-history">
-    <div class="card">
-      <div class="card-title"><span class="icon">📜</span> 生成历史 <span style="font-size:0.8rem; color:var(--muted); font-weight:400; margin-left:auto" id="historyCount">(0)</span></div>
-      <div id="historyList">
-        <div style="text-align:center; padding:40px 0; color:var(--muted); font-size:0.9rem;">
-          暂无历史记录，生成语音后会自动保存在这里
-        </div>
-      </div>
-      <div id="clearHistoryBtn" style="display:none; text-align:center; margin-top:12px;">
-        <button class="btn btn-outline btn-sm" onclick="clearHistory()">🗑️ 清空历史</button>
-      </div>
+<!-- ══════════ API Docs Overlay ══════════ -->
+<div class="docs-overlay" id="docsOverlay" onclick="if(event.target===this)toggleDocs()">
+  <div class="docs-content">
+    <button class="docs-close" onclick="toggleDocs()">✕</button>
+    <div class="card-title" style="font-size:1.1rem;"><span class="icon">📖</span> MiMo v2 TTS API 文档</div>
+
+    <div class="doc-section">
+      <h3>📡 接口信息</h3>
+      <table class="doc-table">
+        <tr><th>项目</th><th>值</th></tr>
+        <tr><td>模型</td><td><code>mimo-v2-audio-tts</code></td></tr>
+        <tr><td>API 端点</td><td><code>https://api.xiaomimimo.com/v1/chat/completions</code></td></tr>
+        <tr><td>认证方式</td><td>Header <code>api-key: YOUR_KEY</code></td></tr>
+        <tr><td>输出格式</td><td>WAV (24kHz, 16-bit PCM, 单声道)</td></tr>
+        <tr><td>最大文本长度</td><td>10,000 字符</td></tr>
+      </table>
     </div>
-  </div>
 
-  <!-- ══════════ Tab: API Docs ══════════ -->
-  <div class="tab-panel" id="panel-docs">
-    <div class="card">
-      <div class="card-title"><span class="icon">📖</span> MiMo v2 TTS API 文档</div>
-
-      <div class="doc-section">
-        <h3>📡 接口信息</h3>
-        <table class="doc-table">
-          <tr><th>项目</th><th>值</th></tr>
-          <tr><td>模型</td><td><code>mimo-v2-audio-tts</code></td></tr>
-          <tr><td>API 端点</td><td><code>https://api.xiaomimimo.com/v1/chat/completions</code></td></tr>
-          <tr><td>认证方式</td><td>Header <code>api-key: YOUR_KEY</code></td></tr>
-          <tr><td>输出格式</td><td>WAV (24kHz, 16-bit PCM, 单声道)</td></tr>
-          <tr><td>最大文本长度</td><td>10,000 字符</td></tr>
-        </table>
-      </div>
-
-      <div class="doc-section">
-        <h3>📤 请求格式</h3>
-        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:8px;">基本调用（默认音色）：</p>
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
+    <div class="doc-section">
+      <h3>📤 请求格式</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
 <pre><code>curl -X POST https://api.xiaomimimo.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "api-key: YOUR_API_KEY" \
@@ -724,59 +892,39 @@
       {"role": "assistant", "content": "你好，我是小米AI语音助手。"}
     ]
   }'</code></pre>
-        </div>
-
-        <p style="font-size:0.82rem; color:var(--muted); margin: 16px 0 8px;">带风格的调用：</p>
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
-<pre><code>{
-  "model": "mimo-v2-audio-tts",
-  "audio": {"format": "wav", "voice": "mimo_default"},
-  "messages": [
-    {"role": "assistant", "content": "&lt;style&gt;开心激动&lt;/style&gt;恭喜你获得了一等奖！"}
-  ]
-}</code></pre>
-        </div>
-
-        <p style="font-size:0.82rem; color:var(--muted); margin: 16px 0 8px;">语音克隆（上传参考音频）：</p>
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
-<pre><code>{
-  "model": "mimo-v2-audio-tts",
-  "audio": {
-    "format": "wav",
-    "voice_audio": {
-      "format": "wav",
-      "data": "&lt;base64-encoded-wav&gt;"
-    }
-  },
-  "messages": [
-    {"role": "assistant", "content": "大家好，我是自定义音色。"}
-  ]
-}</code></pre>
-        </div>
       </div>
+    </div>
 
-      <div class="doc-section">
-        <h3>📥 响应格式</h3>
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
+    <div class="doc-section">
+      <h3>🎨 风格能力一览</h3>
+      <table class="doc-table">
+        <tr><th>分类</th><th>示例</th><th>说明</th></tr>
+        <tr><td>情绪</td><td><code>开心</code> <code>悲伤</code> <code>生气</code></td><td>控制语音情感基调</td></tr>
+        <tr><td>方言</td><td><code>东北话</code> <code>四川话</code> <code>粤语</code></td><td>模拟不同地区口音</td></tr>
+        <tr><td>角色</td><td><code>像个大将军</code> <code>像个小孩</code> <code>孙悟空</code></td><td>模仿特定角色声音</td></tr>
+        <tr><td>组合</td><td><code>深情款款 语速慢</code> <code>撒娇 台湾腔</code></td><td>多个风格自由组合</td></tr>
+        <tr><td>唱歌</td><td><code>唱歌</code> + 歌词内容</td><td>开启歌唱模式</td></tr>
+      </table>
+    </div>
+
+    <div class="doc-section">
+      <h3>📥 响应格式</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
 <pre><code>{
   "choices": [{
     "message": {
-      "audio": {
-        "data": "&lt;base64-encoded-wav&gt;"
-      }
+      "audio": { "data": "&lt;base64-encoded-wav&gt;" }
     }
   }]
 }</code></pre>
-        </div>
       </div>
+    </div>
 
-      <div class="doc-section">
-        <h3>🐍 Python 示例</h3>
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
+    <div class="doc-section">
+      <h3>🐍 Python 示例</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">📋 复制</button>
 <pre><code>import requests, base64
 
 resp = requests.post(
@@ -797,64 +945,29 @@ resp = requests.post(
 audio = base64.b64decode(resp.json()["choices"][0]["message"]["audio"]["data"])
 with open("output.wav", "wb") as f:
     f.write(audio)</code></pre>
-        </div>
       </div>
+    </div>
 
-      <div class="doc-section">
-        <h3>🎨 风格能力一览</h3>
-        <table class="doc-table">
-          <tr><th>分类</th><th>示例</th><th>说明</th></tr>
-          <tr><td>情绪</td><td><code>开心</code> <code>悲伤</code> <code>生气</code> <code>平静</code></td><td>控制语音的情感基调</td></tr>
-          <tr><td>语速</td><td><code>语速慢</code> <code>语速快</code> <code>清晰有力</code></td><td>控制语音播放速度</td></tr>
-          <tr><td>方言</td><td><code>东北话</code> <code>四川话</code> <code>台湾腔</code> <code>粤语</code></td><td>模拟不同地区口音</td></tr>
-          <tr><td>角色</td><td><code>像个大将军</code> <code>像个小孩</code> <code>孙悟空</code></td><td>模仿特定角色声音</td></tr>
-          <tr><td>语气</td><td><code>悄悄话</code> <code>慵懒 刚睡醒</code> <code>撒娇 夹子音</code></td><td>改变说话的语气方式</td></tr>
-          <tr><td>组合</td><td><code>深情款款 语速慢</code> <code>撒娇 台湾腔</code></td><td>多个风格自由组合</td></tr>
-          <tr><td>唱歌</td><td><code>唱歌</code> + 歌词内容</td><td>开启歌唱模式</td></tr>
-        </table>
-      </div>
+    <div class="doc-section">
+      <h3>⚙️ 环境变量</h3>
+      <table class="doc-table">
+        <tr><th>变量</th><th>默认值</th><th>说明</th></tr>
+        <tr><td><code>MIMO_API_KEY</code></td><td>—</td><td>MiMo API 密钥（必需）</td></tr>
+        <tr><td><code>MIMO_API_ENDPOINT</code></td><td><code>https://api.xiaomimimo.com/...</code></td><td>自定义 API 端点</td></tr>
+        <tr><td><code>PORT</code></td><td><code>3210</code></td><td>Web 服务端口</td></tr>
+      </table>
+    </div>
 
-      <div class="doc-section">
-        <h3>🔢 文本规范化规则</h3>
-        <table class="doc-table">
-          <tr><th>输入</th><th>朗读</th><th>输入</th><th>朗读</th></tr>
-          <tr><td><code>3</code></td><td>三</td><td><code>+</code></td><td>加</td></tr>
-          <tr><td><code>3.14</code></td><td>三点一四</td><td><code>-</code></td><td>减</td></tr>
-          <tr><td><code>14:30</code></td><td>下午两点半</td><td><code>*</code></td><td>乘以</td></tr>
-          <tr><td><code>95%</code></td><td>百分之九十五</td><td><code>=</code></td><td>等于</td></tr>
-          <tr><td><code>2024</code></td><td>二零二四年</td><td><code>...</code></td><td>等等</td></tr>
-        </table>
-      </div>
-
-      <div class="doc-section">
-        <h3>⚙️ 环境变量</h3>
-        <table class="doc-table">
-          <tr><th>变量</th><th>默认值</th><th>说明</th></tr>
-          <tr><td><code>MIMO_API_KEY</code></td><td>—</td><td>MiMo API 密钥（必需）</td></tr>
-          <tr><td><code>MIMO_API_ENDPOINT</code></td><td><code>https://api.xiaomimimo.com/v1/chat/completions</code></td><td>自定义 API 端点</td></tr>
-          <tr><td><code>MIMO_TTS_MODEL</code></td><td><code>mimo-v2-audio-tts</code></td><td>自定义模型名称</td></tr>
-          <tr><td><code>PORT</code></td><td><code>3210</code></td><td>Web 服务端口</td></tr>
-        </table>
-      </div>
-
-      <div class="doc-section">
-        <h3>⚠️ 错误码</h3>
-        <table class="doc-table">
-          <tr><th>HTTP 状态</th><th>可能原因</th></tr>
-          <tr><td><code>400</code></td><td>请求参数错误（text 为空或过长）</td></tr>
-          <tr><td><code>401</code></td><td>API Key 无效或未设置</td></tr>
-          <tr><td><code>500</code></td><td>服务端错误，稍后重试</td></tr>
-          <tr><td><code>503</code></td><td>服务暂不可用</td></tr>
-        </table>
-      </div>
-
+    <div class="doc-section">
+      <h3>⚠️ 错误码</h3>
+      <table class="doc-table">
+        <tr><th>HTTP 状态</th><th>可能原因</th></tr>
+        <tr><td><code>400</code></td><td>请求参数错误</td></tr>
+        <tr><td><code>401</code></td><td>API Key 无效或未设置</td></tr>
+        <tr><td><code>500</code></td><td>服务端错误</td></tr>
+      </table>
     </div>
   </div>
-
-  <div class="footer">
-    Powered by <a href="https://xiaomimimo.com" target="_blank">小米 MiMo v2 TTS</a> · MIT License
-  </div>
-
 </div>
 
 <script>
@@ -876,79 +989,121 @@ with open("output.wav", "wb") as f:
     loadApiKey();
   });
 
-  // ── Collapsible sections ──
+  // ── Collapsible ──
   function toggleCollapse(el) {
     const body = el.nextElementSibling;
     el.classList.toggle('open');
     body.classList.toggle('open');
   }
 
-  // ── Tab Switching ──
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
-    document.getElementById(`panel-${tab}`).classList.add('active');
+  // ── Docs Overlay ──
+  function toggleDocs() {
+    document.getElementById('docsOverlay').classList.toggle('show');
+  }
+  function showMain() {
+    document.getElementById('docsOverlay').classList.remove('show');
   }
 
-  // ── API Key Management ──
+  // ── API Key ──
   function loadApiKey() {
     const saved = localStorage.getItem('mimo_api_key');
     if (saved) {
       document.getElementById('apiKeyInput').value = saved;
-      document.getElementById('apiKeyStatus').innerHTML = '<span style="color:var(--success)">✅ API Key 已加载</span>';
+      document.getElementById('apiKeyStatus').innerHTML = '<span style="color:var(--success)">✅ 已加载</span>';
     }
   }
   function saveApiKey() {
     const key = document.getElementById('apiKeyInput').value.trim();
-    if (!key) {
-      document.getElementById('apiKeyStatus').innerHTML = '<span style="color:var(--danger)">请输入 API Key</span>';
-      return;
-    }
+    if (!key) { document.getElementById('apiKeyStatus').innerHTML = '<span style="color:var(--danger)">请输入 API Key</span>'; return; }
     localStorage.setItem('mimo_api_key', key);
-    document.getElementById('apiKeyStatus').innerHTML = '<span style="color:var(--success)">✅ API Key 已保存到浏览器</span>';
+    document.getElementById('apiKeyStatus').innerHTML = '<span style="color:var(--success)">✅ 已保存</span>';
   }
   function toggleKeyVisibility() {
     const input = document.getElementById('apiKeyInput');
     const icon = document.getElementById('keyEyeIcon');
-    if (input.type === 'password') {
-      input.type = 'text';
-      icon.textContent = '🙈';
-    } else {
-      input.type = 'password';
-      icon.textContent = '👁️';
-    }
+    if (input.type === 'password') { input.type = 'text'; icon.textContent = '🙈'; }
+    else { input.type = 'password'; icon.textContent = '👁️'; }
   }
-  async function testApiKey() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    const status = document.getElementById('apiKeyStatus');
-    if (!key) { status.innerHTML = '<span style="color:var(--danger)">请先输入 API Key</span>'; return; }
-    status.innerHTML = '<span style="color:var(--warning)">⏳ 正在测试...</span>';
-    try {
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: '测试', apiKey: key }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        status.innerHTML = '<span style="color:var(--success)">✅ API Key 有效，可用！</span>';
-      } else {
-        status.innerHTML = `<span style="color:var(--danger)">❌ ${escHtml(data.error || '验证失败')}</span>`;
-      }
-    } catch (e) {
-      status.innerHTML = `<span style="color:var(--danger)">❌ 网络错误: ${escHtml(e.message)}</span>`;
+
+  // ── Undo Stack ──
+  let undoStack = [];
+
+  function saveUndo() {
+    const val = textInput.value;
+    // Don't save duplicates
+    if (undoStack.length > 0 && undoStack[undoStack.length - 1] === val) return;
+    undoStack.push(val);
+    if (undoStack.length > 50) undoStack.shift();
+    updateUndoBtn();
+  }
+
+  function undoText() {
+    if (undoStack.length === 0) return;
+    const prev = undoStack.pop();
+    textInput.value = prev;
+    charCount.textContent = prev.length;
+    updateLinePreview(prev);
+    textInput.focus();
+    updateUndoBtn();
+  }
+
+  function updateUndoBtn() {
+    const btn = document.getElementById('undoBtn');
+    const badge = document.getElementById('undoCount');
+    if (undoStack.length > 0) {
+      btn.style.opacity = '1';
+      badge.style.display = 'flex';
+      badge.textContent = undoStack.length;
+    } else {
+      btn.style.opacity = '0.4';
+      badge.style.display = 'none';
     }
   }
 
-  // ── Chip Selection ──
+  // ── Insert text at cursor in textarea ──
+  function insertAtCursor(text, addNewline) {
+    saveUndo();
+    const ta = textInput;
+    const start = ta.selectionStart;
+    const val = ta.value;
+
+    // Find beginning of current line
+    const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+    const beforeLine = val.slice(0, lineStart);
+    const line = val.slice(lineStart);
+
+    if (addNewline) {
+      // Insert as new line at cursor
+      const before = val.slice(0, start);
+      const after = val.slice(ta.selectionEnd);
+      const insertText = (start > 0 && !val[start - 1]?.match(/\n/) ? '\n' : '') + text + '\n';
+      ta.value = before + insertText + after;
+      ta.selectionStart = ta.selectionEnd = start + insertText.length;
+    } else {
+      // Insert [tag] at the start of current line
+      ta.value = beforeLine + text + line;
+      ta.selectionStart = ta.selectionEnd = start + text.length;
+    }
+    ta.focus();
+    charCount.textContent = ta.value.length;
+    updateLinePreview(ta.value);
+  }
+
+  // ── Chip Selection (dual: global style + insert tag) ──
   function initChips() {
-    ['emotionChips','speedChips','dialectChips','roleChips','toneChips'].forEach(id => {
+    const chipGroups = ['emotionChips','dialectChips','roleChips','toneChips'];
+    chipGroups.forEach(id => {
       document.getElementById(id).addEventListener('click', e => {
         const chip = e.target.closest('.chip');
         if (!chip) return;
+        // Select as global style
         document.getElementById(id).querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
+        // Also insert [tag] into textarea if it has a data-insert value
+        const insertVal = chip.dataset.insert;
+        if (insertVal) {
+          insertAtCursor('[' + insertVal + ']');
+        }
       });
     });
 
@@ -960,26 +1115,56 @@ with open("output.wav", "wb") as f:
       const val = chip.dataset.value;
       if (val) {
         document.getElementById('singInput').value = '';
-        document.getElementById('singInput').placeholder = `预置歌曲：${chip.textContent.trim()}，将自动查找歌词`;
+        document.getElementById('singInput').placeholder = `预置歌曲：${chip.textContent.trim()}`;
       } else {
-        document.getElementById('singInput').placeholder = '输入歌词，或选择上方预置歌曲…';
+        document.getElementById('singInput').placeholder = '输入歌词或选择预置歌曲…';
       }
     });
   }
-
   function getChipValue(groupId) {
     const active = document.querySelector(`#${groupId} .chip.active`);
     return active ? active.dataset.value : '';
   }
 
-  // ── Singing Mode ──
+  // ── Slider tag insertion ──
+  function insertSliderTag(type) {
+    let tag = '';
+    switch (type) {
+      case 'speed': {
+        const v = parseFloat(document.getElementById('speedSlider').value);
+        if (v === 1.0) return; // default, skip
+        tag = '语速' + v + 'x';
+        break;
+      }
+      case 'volume': {
+        const v = parseInt(document.getElementById('volumeSlider').value);
+        if (v === 100) return;
+        tag = '音量' + v + '%';
+        break;
+      }
+      case 'pitch': {
+        const v = parseInt(document.getElementById('pitchSlider').value);
+        if (v === 0) return;
+        tag = '音高' + (v > 0 ? '+' : '') + v;
+        break;
+      }
+      case 'pause': {
+        const v = parseInt(document.getElementById('pauseSlider').value);
+        if (v === 0) return;
+        tag = '停顿' + v + 'ms';
+        break;
+      }
+    }
+    if (tag) insertAtCursor('[' + tag + ']', type === 'pause');
+  }
+
+  // ── Singing ──
   function toggleSing(on) {
     isSinging = on;
     const panel = document.getElementById('singPanel');
     const onChip = document.querySelector('#singChips .chip[data-value="__sing_on__"]');
     const offChip = document.querySelector('#singChips .chip[data-value="__sing_off__"]');
     const defaultChip = document.querySelector('#singChips .chip[data-value=""]');
-
     document.querySelectorAll('#singChips .chip').forEach(c => c.classList.remove('active'));
     if (on) {
       panel.style.display = 'block';
@@ -994,33 +1179,26 @@ with open("output.wav", "wb") as f:
     }
   }
 
-  // ── Normalize Toggle ──
+  // ── Toggles ──
   function toggleNormalize() {
     autoNormalize = !autoNormalize;
     document.getElementById('normalizeToggle').classList.toggle('on', autoNormalize);
   }
-
-  // ── Preview Mode ──
   function togglePreview() {
     previewMode = !previewMode;
     document.getElementById('previewToggle').classList.toggle('on', previewMode);
   }
 
-  // ── Format Selection ──
+  // ── Format ──
   function selectFormat(el) {
     document.querySelectorAll('.format-pill').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
     outputFormat = el.dataset.fmt;
   }
 
-  // ── Slider Helpers ──
+  // ── Sliders ──
   function updateSliderVal(valId, value, suffix) {
     document.getElementById(valId).textContent = value + suffix;
-  }
-  function resetSlider(sliderId, valId, defaultVal, suffix) {
-    const slider = document.getElementById(sliderId);
-    slider.value = defaultVal;
-    document.getElementById(valId).textContent = defaultVal + suffix;
   }
 
   // ── Voice File ──
@@ -1029,81 +1207,150 @@ with open("output.wav", "wb") as f:
     if (!file) return;
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('removeVoiceBtn').style.display = 'inline-block';
-
     const reader = new FileReader();
-    reader.onload = () => {
-      voiceFileBase64 = reader.result.split(',')[1];
-    };
+    reader.onload = () => { voiceFileBase64 = reader.result.split(',')[1]; };
     reader.readAsDataURL(file);
   }
   function removeVoiceFile() {
     voiceFileBase64 = null;
     document.getElementById('voiceFile').value = '';
-    document.getElementById('fileName').textContent = '点击上传音频文件';
+    document.getElementById('fileName').textContent = '点击上传音频';
     document.getElementById('removeVoiceBtn').style.display = 'none';
   }
 
-  // ── Build Style String ──
+  // ── Build Style ──
   function buildStyle() {
     const custom = document.getElementById('customStyle').value.trim();
     if (custom) return custom;
-
     if (isSinging) return '唱歌';
-
-    const parts = [
+    return [
       getChipValue('emotionChips'),
-      getChipValue('speedChips'),
       getChipValue('dialectChips'),
       getChipValue('roleChips'),
       getChipValue('toneChips'),
-    ].filter(Boolean);
-
-    return parts.join(' ');
+    ].filter(Boolean).join(' ');
   }
 
   // ── Text Normalization ──
   function normalizeText(text) {
     if (!autoNormalize) return text;
-
     let result = text;
-
-    // 3.14 → 三点一四
     result = result.replace(/(\d+)\.(\d+)/g, (_, a, b) => {
       const digits = ['零','一','二','三','四','五','六','七','八','九'];
-      const aChars = a.split('').map(d => digits[parseInt(d)]).join('');
-      const bChars = b.split('').map(d => digits[parseInt(d)]).join('');
-      return aChars + '点' + bChars;
+      return a.split('').map(d => digits[parseInt(d)]).join('') + '点' + b.split('').map(d => digits[parseInt(d)]).join('');
     });
-
-    // 14:30 → 十四点三十分 (simplified)
-    result = result.replace(/(\d{1,2}):(\d{2})/g, (m) => m); // keep complex logic for now
-
-    // 95% → 百分之九十五
     result = result.replace(/(\d+)%/g, (_, n) => {
       const numMap = { '0':'零','1':'一','2':'二','3':'三','4':'四','5':'五','6':'六','7':'七','8':'八','9':'九' };
-      const chars = n.split('').map(d => numMap[d] || d).join('');
-      return '百分之' + chars;
+      return '百分之' + n.split('').map(d => numMap[d] || d).join('');
     });
-
     return result;
   }
 
-  // ── Error / UI Helpers ──
+  // ── Multi-role helpers ──
+  function toggleRoleTip() {
+    document.getElementById('roleTip').style.display =
+      document.getElementById('roleTip').style.display === 'none' ? 'block' : 'none';
+  }
+
+  function insertTag(tag) {
+    saveUndo();
+    const ta = document.getElementById('textInput');
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const val = ta.value;
+
+    // If cursor is at start of a line or at the very beginning, insert directly
+    const beforeCursor = val.slice(0, start);
+    const atLineStart = start === 0 || beforeCursor.endsWith('\n');
+
+    if (atLineStart) {
+      ta.value = val.slice(0, start) + tag + val.slice(end);
+    } else {
+      const insertText = beforeCursor.endsWith('\n') ? tag : '\n' + tag;
+      ta.value = val.slice(0, start) + insertText + val.slice(end);
+      ta.selectionStart = ta.selectionEnd = start + insertText.length;
+    }
+    ta.focus();
+    charCount.textContent = ta.value.length;
+    updateLinePreview(ta.value);
+  }
+
+  // ── Parse bracket tags from a line (client-side preview) ──
+  function parseClientLineTags(line) {
+    const tags = [];
+    let pauseTags = [];
+    let rest = line.trimStart();
+    const re = /^\[([^\]]+)\]\s*/;
+    let m;
+    while ((m = rest.match(re))) {
+      const tag = m[1].trim();
+      if (/^(?:停顿|pause)\s*\d+\s*(?:ms|毫秒)?$/i.test(tag)) {
+        pauseTags.push(tag);
+      } else {
+        tags.push(tag);
+      }
+      rest = rest.slice(m[0].length);
+    }
+    return { tags, pauseTags, text: rest.trim() };
+  }
+
+  // ── Line preview (show parsed tags) ──
+  function updateLinePreview(text) {
+    const el = document.getElementById('linePreview');
+    if (!text.trim()) { el.classList.remove('show'); return; }
+
+    const lines = text.split('\n').filter(l => l.trim());
+    const tagged = [];
+    for (const line of lines) {
+      const { tags, pauseTags, text: lineText } = parseClientLineTags(line);
+      if (tags.length > 0 || pauseTags.length > 0) {
+        tagged.push({ tags, pauseTags, text: lineText || line });
+      }
+    }
+
+    if (tagged.length === 0) { el.classList.remove('show'); return; }
+
+    el.classList.add('show');
+    el.innerHTML = tagged.map(item =>
+      `<div class="line-preview-item">
+        ${item.tags.map(t => `<span class="line-preview-tag">${escHtml(t)}</span>`).join('')}
+        ${item.pauseTags.map(t => `<span class="line-preview-tag" style="background:#fff3e0; color:#e65100;">⏸ ${escHtml(t)}</span>`).join('')}
+        <span class="line-preview-text">${escHtml(item.text)}</span>
+      </div>`
+    ).join('');
+  }
+
+  // ── UI Refs ──
   const textInput = document.getElementById('textInput');
   const charCount = document.getElementById('charCount');
   const generateBtn = document.getElementById('generateBtn');
   const loadingEl = document.getElementById('loading');
-  const resultCard = document.getElementById('result');
   const errorMsg = document.getElementById('errorMsg');
 
+  let undoSaveNeeded = true;
   textInput.addEventListener('input', () => {
     charCount.textContent = textInput.value.length;
+    updateLinePreview(textInput.value);
   });
+  // Save undo state right before user modifies text (keydown is before the change)
+  textInput.addEventListener('keydown', () => {
+    if (undoSaveNeeded) {
+      const lastSaved = undoStack.length > 0 ? undoStack[undoStack.length - 1] : null;
+      if (lastSaved !== textInput.value) {
+        undoStack.push(textInput.value);
+        if (undoStack.length > 50) undoStack.shift();
+        updateUndoBtn();
+      }
+      undoSaveNeeded = false;
+    }
+  });
+  textInput.addEventListener('keyup', () => { undoSaveNeeded = true; });
+  textInput.addEventListener('mouseup', () => { undoSaveNeeded = true; });
 
   function showError(msg) {
     errorMsg.textContent = msg;
     errorMsg.classList.add('show');
-    setTimeout(() => errorMsg.classList.remove('show'), 10000);
+    setTimeout(() => errorMsg.classList.remove('show'), 8000);
   }
 
   // ── Generate ──
@@ -1111,28 +1358,16 @@ with open("output.wav", "wb") as f:
     let text = textInput.value.trim();
     if (!text) { showError('请输入文字'); return; }
 
-    // Preview mode: truncate to 50 chars
     const usePreview = isPreview || previewMode;
-    if (usePreview && text.length > 50) {
-      text = text.slice(0, 50);
-    }
-
+    if (usePreview && text.length > 50) text = text.slice(0, 50);
     text = normalizeText(text);
 
-    // Handle singing mode
     let style = buildStyle();
     if (isSinging) {
       const songVal = getChipValue('songChips');
       const singText = document.getElementById('singInput').value.trim();
-      if (!songVal && !singText) {
-        showError('唱歌模式下请选择预置歌曲或输入歌词');
-        return;
-      }
-      if (singText && !songVal) {
-        text = 'LYRICS:' + singText;
-      } else if (songVal) {
-        text = songVal;
-      }
+      if (!songVal && !singText) { showError('唱歌模式下请选择歌曲或输入歌词'); return; }
+      text = singText ? 'LYRICS:' + singText : songVal;
     }
 
     const body = {
@@ -1144,15 +1379,14 @@ with open("output.wav", "wb") as f:
       volume: parseInt(document.getElementById('volumeSlider').value),
       pauseMs: parseInt(document.getElementById('pauseSlider').value),
     };
-
-    // Include API key from page input
     const pageApiKey = document.getElementById('apiKeyInput').value.trim();
     if (pageApiKey) body.apiKey = pageApiKey;
 
     const btn = isPreview ? document.getElementById('previewBtn') : generateBtn;
     btn.disabled = true;
     loadingEl.classList.add('show');
-    resultCard.classList.remove('show');
+    document.getElementById('resultContent').style.display = 'none';
+    document.getElementById('resultEmpty').style.display = 'none';
     errorMsg.classList.remove('show');
     const startTime = Date.now();
 
@@ -1177,18 +1411,17 @@ with open("output.wav", "wb") as f:
       currentBlobUrl = URL.createObjectURL(blob);
       currentFilename = data.filename || `tts_output.${data.format || 'wav'}`;
 
+      const audioPlayer = document.getElementById('audioPlayer');
       audioPlayer.src = currentBlobUrl;
       audioPlayer.play().catch(() => {});
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       document.getElementById('metaSize').textContent = `📏 ${(data.size / 1024).toFixed(1)} KB`;
       document.getElementById('metaTime').textContent = `⏱️ ${elapsed}s`;
-      const modeLabel = usePreview ? '🎧 试听' : (style ? `🎨 ${style}` : '🎨 默认');
-      document.getElementById('metaStyle').textContent = modeLabel;
+      document.getElementById('metaStyle').textContent = usePreview ? '🎧 试听' : (style ? `🎨 ${style}` : '🎨 默认');
 
-      resultCard.classList.add('show');
+      document.getElementById('resultContent').style.display = 'block';
 
-      // Save to history
       addHistory({
         text: textInput.value.trim().slice(0, 100),
         style: style || '默认',
@@ -1205,6 +1438,7 @@ with open("output.wav", "wb") as f:
       });
     } catch (err) {
       showError(err.message);
+      document.getElementById('resultEmpty').style.display = 'block';
     } finally {
       btn.disabled = false;
       loadingEl.classList.remove('show');
@@ -1213,10 +1447,10 @@ with open("output.wav", "wb") as f:
 
   // ── Playback ──
   function playAgain() {
+    const audioPlayer = document.getElementById('audioPlayer');
     audioPlayer.currentTime = 0;
     audioPlayer.play().catch(() => {});
   }
-
   function download() {
     if (!currentBlobUrl) return;
     const a = document.createElement('a');
@@ -1226,6 +1460,12 @@ with open("output.wav", "wb") as f:
     a.click();
     document.body.removeChild(a);
   }
+  function copyAudioUrl() {
+    if (!currentBlobUrl) return;
+    navigator.clipboard.writeText(currentBlobUrl).then(() => {
+      alert('链接已复制（blob URL，仅当前页面有效）');
+    });
+  }
 
   // ── History ──
   function addHistory(item) {
@@ -1234,7 +1474,6 @@ with open("output.wav", "wb") as f:
     localStorage.setItem('tts_history', JSON.stringify(history));
     renderHistory();
   }
-
   function renderHistory() {
     const list = document.getElementById('historyList');
     const count = document.getElementById('historyCount');
@@ -1242,25 +1481,19 @@ with open("output.wav", "wb") as f:
     count.textContent = `(${history.length})`;
 
     if (history.length === 0) {
-      list.innerHTML = '<div style="text-align:center; padding:40px 0; color:var(--muted); font-size:0.9rem;">暂无历史记录</div>';
+      list.innerHTML = '<div class="history-empty">暂无历史记录</div>';
       clearBtn.style.display = 'none';
       return;
     }
-
     clearBtn.style.display = '';
     list.innerHTML = history.map((h, i) => {
-      // Build param summary
       const parts = [];
-      if (h.style && h.style !== '默认') parts.push(`🎨${escHtml(h.style)}`);
-      if (h.speed && h.speed !== 1) parts.push(`⚡${h.speed}x`);
-      if (h.volume && h.volume !== 100) parts.push(`🔊${h.volume}%`);
-      if (h.pitch && h.pitch !== 0) parts.push(`🎵${h.pitch > 0 ? '+' : ''}${h.pitch}`);
-      if (h.pauseMs && h.pauseMs > 0) parts.push(`⏸${h.pauseMs}ms`);
-      if (h.format && h.format !== 'wav') parts.push(`📦${h.format.toUpperCase()}`);
-      const params = parts.length ? parts.join(' · ') : '默认参数';
+      if (h.style && h.style !== '默认') parts.push(escHtml(h.style));
+      if (h.speed && h.speed !== 1) parts.push(`${h.speed}x`);
+      if (h.format && h.format !== 'wav') parts.push(h.format.toUpperCase());
+      const params = parts.length ? parts.join(' · ') : '默认';
       return `
       <div class="history-item" onclick="playHistory(${i})">
-        <span class="hist-icon">🔊</span>
         <div style="flex:1; overflow:hidden;">
           <div class="hist-text">${escHtml(h.text)}</div>
           <div class="hist-style">${params} · ${h.time}</div>
@@ -1270,7 +1503,6 @@ with open("output.wav", "wb") as f:
       </div>`;
     }).join('');
   }
-
   function playHistory(index) {
     const h = history[index];
     if (!h) return;
@@ -1279,25 +1511,20 @@ with open("output.wav", "wb") as f:
     for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
     const blob = new Blob([byteArray], { type: h.mimeType || 'audio/wav' });
     const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    audio.play();
+    new Audio(url).play();
   }
-
   function deleteHistory(index) {
-    if (!confirm('确定删除这条历史记录？')) return;
+    if (!confirm('确定删除？')) return;
     history.splice(index, 1);
     localStorage.setItem('tts_history', JSON.stringify(history));
     renderHistory();
   }
-  }
-
   function clearHistory() {
-    if (!confirm('确定清空所有历史记录？')) return;
+    if (!confirm('确定清空所有历史？')) return;
     history = [];
     localStorage.setItem('tts_history', JSON.stringify(history));
     renderHistory();
   }
-
   function escHtml(s) {
     const d = document.createElement('div');
     d.textContent = s;

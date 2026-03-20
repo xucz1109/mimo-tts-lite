@@ -169,11 +169,34 @@ async function callTTS({ text, style, apiKey, voiceAudioBase64, speed, pitch, vo
   return buildWav(raw);
 }
 
-// ── Paragraph pause: synthesize segments with silence between ───────────────
-async function callTTSWithPause({ text, style, apiKey, voiceAudioBase64, pauseMs, speed, pitch, volume }) {
-  const segments = text.split(/\n/).filter(s => s.trim().length > 0);
+// ── Parse per-line bracket tags: [男声][鸣人][愤怒][快速][停顿500ms] text... ──
+function parseLineTags(line) {
+  const tags = [];
+  let pauseMs = 0;
+  let rest = line.trimStart();
+  // Match leading [tag] groups
+  const re = /^\[([^\]]+)\]\s*/;
+  let m;
+  while ((m = rest.match(re))) {
+    const tag = m[1].trim();
+    // Check if it's a pause tag: [停顿500ms] [pause500ms] etc.
+    const pauseMatch = tag.match(/^(?:停顿|pause)\s*(\d+)\s*(?:ms|毫秒)?$/i);
+    if (pauseMatch) {
+      pauseMs = parseInt(pauseMatch[1]);
+    } else {
+      tags.push(tag);
+    }
+    rest = rest.slice(m[0].length);
+  }
+  return { tags, pauseMs, text: rest.trim() };
+}
 
-  if (segments.length <= 1) {
+// ── Paragraph pause: synthesize segments with silence between ───────────────
+// Supports per-line bracket tags that override the global style
+async function callTTSWithPause({ text, style, apiKey, voiceAudioBase64, pauseMs, speed, pitch, volume }) {
+  const rawLines = text.split(/\n/).filter(s => s.trim().length > 0);
+
+  if (rawLines.length <= 1 && !rawLines[0]?.trim().startsWith('[')) {
     return callTTS({ text, style, apiKey, voiceAudioBase64, speed, pitch, volume });
   }
 
@@ -181,21 +204,38 @@ async function callTTSWithPause({ text, style, apiKey, voiceAudioBase64, pauseMs
   const silencePcm = extractPcm(silenceWav);
   const parts = [];
 
-  for (let i = 0; i < segments.length; i++) {
+  for (let i = 0; i < rawLines.length; i++) {
+    const line = rawLines[i].trim();
+    const { tags, pauseMs: linePause, text: lineText } = parseLineTags(line);
+
+    if (!lineText && tags.length === 0) continue;
+
+    // Per-line style: if tags present, join them as style override
+    const lineStyle = tags.length > 0 ? tags.join(' ') : style;
+
     const wav = await callTTS({
-      text: segments[i].trim(),
-      style,
+      text: lineText || line, // fallback: if no text after tags, use raw line
+      style: lineStyle,
       apiKey,
-      voiceAudioBase64,
+      voiceAudioBase64: voiceAudioBase64,
       speed,
       pitch,
       volume,
     });
     parts.push(extractPcm(wav));
 
-    if (i < segments.length - 1) {
-      parts.push(silencePcm);
+    if (i < rawLines.length - 1) {
+      // Use per-line pause if set, otherwise use global pauseMs
+      const gapMs = linePause > 0 ? linePause : pauseMs;
+      if (gapMs > 0) {
+        const gapSilence = buildSilenceWav(gapMs);
+        parts.push(extractPcm(gapSilence));
+      }
     }
+  }
+
+  if (parts.length === 0) {
+    throw new Error('No valid text content found');
   }
 
   const combinedPcm = Buffer.concat(parts);
@@ -274,9 +314,12 @@ app.post('/api/tts', async (req, res) => {
     const pause = Math.max(0, Math.min(5000, parseInt(pauseMs) || 0));
     const outFormat = format === 'mp3' ? 'mp3' : 'wav';
 
+    // Detect multi-role: any line starting with [tag]
+    const hasMultiRole = finalText.split('\n').some(l => /^\s*\[/.test(l));
+
     let wavBuffer;
     try {
-      if (pause > 0) {
+      if (pause > 0 || hasMultiRole) {
         wavBuffer = await callTTSWithPause({
           text: finalText, style, apiKey,
           voiceAudioBase64: voiceB64,
