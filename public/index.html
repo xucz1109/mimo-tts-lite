@@ -632,29 +632,70 @@
   }
 
   function highlightDifferentText(leftDiv, rightDiv, leftText, rightText) {
+    const { leftHighlighted, rightHighlighted } = smartCompare(leftText, rightText);
+    leftDiv.innerHTML = leftHighlighted;
+    rightDiv.innerHTML = rightHighlighted;
+  }
+
+  function smartCompare(leftText, rightText) {
     const leftChars = leftText.split('');
     const rightChars = rightText.split('');
     
-    let leftResult = '';
-    let rightResult = '';
+    const leftLen = leftChars.length;
+    const rightLen = rightChars.length;
     
-    const maxLength = Math.max(leftChars.length, rightChars.length);
+    // 创建距离矩阵
+    const dp = Array(leftLen + 1).fill().map(() => Array(rightLen + 1).fill(0));
     
-    for (let i = 0; i < maxLength; i++) {
-      const leftChar = leftChars[i] || '';
-      const rightChar = rightChars[i] || '';
-      
-      if (leftChar === rightChar) {
-        leftResult += `<span style="color: #155724; font-weight: 600;">${escHtml(leftChar)}</span>`;
-        rightResult += `<span style="color: #155724; font-weight: 600;">${escHtml(rightChar)}</span>`;
-      } else {
-        leftResult += `<span style="color: #856404; font-weight: 600; background: #fff3cd;">${escHtml(leftChar)}</span>`;
-        rightResult += `<span style="color: #856404; font-weight: 600; background: #fff3cd;">${escHtml(rightChar)}</span>`;
+    // 初始化第一行和第一列
+    for (let i = 0; i <= leftLen; i++) dp[i][0] = i;
+    for (let j = 0; j <= rightLen; j++) dp[0][j] = j;
+    
+    // 填充距离矩阵
+    for (let i = 1; i <= leftLen; i++) {
+      for (let j = 1; j <= rightLen; j++) {
+        if (leftChars[i-1] === rightChars[j-1]) {
+          dp[i][j] = dp[i-1][j-1];
+        } else {
+          dp[i][j] = Math.min(
+            dp[i-1][j] + 1,    // 删除
+            dp[i][j-1] + 1,    // 插入
+            dp[i-1][j-1] + 1   // 替换
+          );
+        }
       }
     }
     
-    leftDiv.innerHTML = leftResult;
-    rightDiv.innerHTML = rightResult;
+    // 回溯构建结果
+    let i = leftLen;
+    let j = rightLen;
+    const leftResult = [];
+    const rightResult = [];
+    
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && leftChars[i-1] === rightChars[j-1]) {
+        // 字符相同
+        leftResult.unshift(`<span style="color: #155724; font-weight: 600;">${escHtml(leftChars[i-1])}</span>`);
+        rightResult.unshift(`<span style="color: #155724; font-weight: 600;">${escHtml(rightChars[j-1])}</span>`);
+        i--;
+        j--;
+      } else if (i > 0 && (j === 0 || dp[i-1][j] <= dp[i][j-1])) {
+        // 左侧有多余字符（删除）
+        leftResult.unshift(`<span style="color: #dc3545; font-weight: 600; background: #f8d7da;">${escHtml(leftChars[i-1])}</span>`);
+        rightResult.unshift('');
+        i--;
+      } else {
+        // 右侧有多余字符（插入）
+        leftResult.unshift('');
+        rightResult.unshift(`<span style="color: #dc3545; font-weight: 600; background: #f8d7da;">${escHtml(rightChars[j-1])}</span>`);
+        j--;
+      }
+    }
+    
+    return {
+      leftHighlighted: leftResult.join(''),
+      rightHighlighted: rightResult.join('')
+    };
   }
 
   function clearCompare() {
