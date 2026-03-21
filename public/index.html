@@ -96,6 +96,11 @@
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
     }
+    .sticky-card {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+    }
     .card-title {
       font-size: 0.85rem; font-weight: 700; margin-bottom: 10px;
       display: flex; align-items: center; gap: 8px; color: var(--text);
@@ -501,8 +506,7 @@
         
         <!-- Action Buttons -->
         <div style="display:flex; gap:8px; margin-top:12px;">
-          <button class="btn btn-full" onclick="compareTexts()">🔍 开始对比</button>
-          <button class="btn btn-outline" onclick="clearCompare()">🗑️ 清空</button>
+          <button class="btn btn-full" onclick="clearCompare()">🗑️ 清空</button>
         </div>
       </div>
 
@@ -516,7 +520,7 @@
 
     <!-- ── Right Column ── -->
     <div class="right-col">
-      <div class="card">
+      <div class="card sticky-card">
         <div class="card-title"><span class="icon">💡</span> 使用说明</div>
         <div style="font-size:0.85rem; line-height:1.6; color:var(--text);">
           <p style="margin-bottom:8px;"><strong>功能说明：</strong></p>
@@ -525,10 +529,15 @@
             <li>自动忽略标点符号和空白字符</li>
             <li>相同文本用<span style="background:#d4edda; color:#155724; padding:2px 6px; border-radius:4px;">绿色</span>标注</li>
             <li>不同文本用<span style="background:#fff3cd; color:#856404; padding:2px 6px; border-radius:4px;">黄色</span>标注</li>
+            <li>插入/删除文本用<span style="background:#f8d7da; color:#dc3545; padding:2px 6px; border-radius:4px;">红色</span>标注</li>
           </ul>
-          <p style="margin-bottom:8px;"><strong>使用示例：</strong></p>
-          <p style="margin-bottom:4px;">左侧：带标点的整段文字</p>
-          <p>右侧：不带标点的换行文字</p>
+          <p style="margin-bottom:8px;"><strong>使用方法：</strong></p>
+          <ol style="margin:0; padding-left:18px; margin-bottom:16px;">
+            <li>在左侧输入带标点的整段文字</li>
+            <li>在右侧输入不带标点的换行文字</li>
+            <li>点击下方"开始对比"按钮查看结果</li>
+          </ol>
+          <button class="btn btn-full" onclick="compareTexts()">🔍 开始对比</button>
         </div>
       </div>
     </div>
@@ -570,17 +579,7 @@
 
   // ── Text Comparison ──
   function initCompareEventListeners() {
-    const leftDiv = document.getElementById('compareTextLeft');
-    const rightDiv = document.getElementById('compareTextRight');
-    
-    const debouncedCompare = debounce(compareTexts, 500);
-    
-    leftDiv.addEventListener('input', debouncedCompare);
-    rightDiv.addEventListener('input', debouncedCompare);
-    leftDiv.addEventListener('paste', debouncedCompare);
-    rightDiv.addEventListener('paste', debouncedCompare);
-    leftDiv.addEventListener('keyup', debouncedCompare);
-    rightDiv.addEventListener('keyup', debouncedCompare);
+    // 不再添加自动对比事件，只通过按钮触发
   }
 
   function debounce(func, wait) {
