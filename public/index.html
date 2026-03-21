@@ -491,11 +491,11 @@
         <div style="display:flex; gap:12px; flex:1;">
           <div style="flex:1; display:flex; flex-direction:column;">
             <label style="font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:6px;">左侧文本</label>
-            <textarea id="compareTextLeft" placeholder="输入左侧文本…" style="flex:1; min-height:200px;"></textarea>
+            <div id="compareTextLeft" contenteditable="true" placeholder="输入左侧文本…" style="flex:1; min-height:200px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; font-family:inherit; font-size:0.95rem; line-height:1.7; overflow-y:auto; white-space:pre-wrap; word-wrap:break-word;"></div>
           </div>
           <div style="flex:1; display:flex; flex-direction:column;">
             <label style="font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:6px;">右侧文本</label>
-            <textarea id="compareTextRight" placeholder="输入右侧文本…" style="flex:1; min-height:200px;"></textarea>
+            <div id="compareTextRight" contenteditable="true" placeholder="输入右侧文本…" style="flex:1; min-height:200px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; font-family:inherit; font-size:0.95rem; line-height:1.7; overflow-y:auto; white-space:pre-wrap; word-wrap:break-word;"></div>
           </div>
         </div>
         
@@ -600,8 +600,11 @@
   }
 
   function compareTexts() {
-    const leftText = document.getElementById('compareTextLeft').value;
-    const rightText = document.getElementById('compareTextRight').value;
+    const leftDiv = document.getElementById('compareTextLeft');
+    const rightDiv = document.getElementById('compareTextRight');
+    
+    const leftText = leftDiv.innerText || '';
+    const rightText = rightDiv.innerText || '';
     const resultDiv = document.getElementById('compareResult');
 
     if (!leftText || !rightText) {
@@ -614,50 +617,21 @@
 
     if (normalizedLeft === normalizedRight) {
       resultDiv.innerHTML = '<div style="text-align:center; color:var(--success); font-weight:600;">✅ 文本内容相同（忽略标点和格式）</div>';
-      renderColoredComparison(leftText, rightText, true);
+      highlightSameText(leftDiv, leftText);
+      highlightSameText(rightDiv, rightText);
     } else {
       resultDiv.innerHTML = '<div style="text-align:center; color:var(--danger); font-weight:600;">❌ 文本内容不同</div>';
-      renderColoredComparison(leftText, rightText, false);
+      highlightDifferentText(leftDiv, rightDiv, leftText, rightText);
     }
   }
 
-  function renderColoredComparison(leftText, rightText, isSame) {
-    const leftDiv = document.createElement('div');
-    const rightDiv = document.createElement('div');
-    
-    leftDiv.style.cssText = 'margin-bottom: 12px; padding: 12px; border-radius: var(--radius-sm);';
-    rightDiv.style.cssText = 'padding: 12px; border-radius: var(--radius-sm);';
-    
-    if (isSame) {
-      leftDiv.style.background = '#d4edda';
-      leftDiv.style.color = '#155724';
-      rightDiv.style.background = '#d4edda';
-      rightDiv.style.color = '#155724';
-      leftDiv.innerHTML = `<strong>左侧文本：</strong><br>${renderHighlightedText(leftText, true)}`;
-      rightDiv.innerHTML = `<strong>右侧文本：</strong><br>${renderHighlightedText(rightText, true)}`;
-    } else {
-      leftDiv.style.background = '#fff3cd';
-      leftDiv.style.color = '#856404';
-      rightDiv.style.background = '#fff3cd';
-      rightDiv.style.color = '#856404';
-      // 使用字符级对比
-      const { leftHighlighted, rightHighlighted } = compareChars(leftText, rightText);
-      leftDiv.innerHTML = `<strong>左侧文本：</strong><br>${leftHighlighted}`;
-      rightDiv.innerHTML = `<strong>右侧文本：</strong><br>${rightHighlighted}`;
-    }
-    
-    const resultDiv = document.getElementById('compareResult');
-    resultDiv.innerHTML = '';
-    resultDiv.appendChild(leftDiv);
-    resultDiv.appendChild(rightDiv);
+  function highlightSameText(element, text) {
+    element.innerHTML = text.split('').map(char => 
+      `<span style="color: #155724; font-weight: 600;">${escHtml(char)}</span>`
+    ).join('');
   }
 
-  function renderHighlightedText(text, isSame) {
-    const color = isSame ? '#155724' : '#856404';
-    return `<span style="color: ${color};">${escHtml(text)}</span>`;
-  }
-
-  function compareChars(leftText, rightText) {
+  function highlightDifferentText(leftDiv, rightDiv, leftText, rightText) {
     const leftChars = leftText.split('');
     const rightChars = rightText.split('');
     
@@ -679,12 +653,13 @@
       }
     }
     
-    return { leftHighlighted: leftResult, rightHighlighted: rightResult };
+    leftDiv.innerHTML = leftResult;
+    rightDiv.innerHTML = rightResult;
   }
 
   function clearCompare() {
-    document.getElementById('compareTextLeft').value = '';
-    document.getElementById('compareTextRight').value = '';
+    document.getElementById('compareTextLeft').innerHTML = '';
+    document.getElementById('compareTextRight').innerHTML = '';
     document.getElementById('compareResult').innerHTML = '<div style="text-align:center; color:var(--muted);">请输入文本进行对比</div>';
   }
 
