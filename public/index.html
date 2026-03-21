@@ -612,17 +612,44 @@
       return;
     }
 
+    // 调整高度对齐
+    const { adjustedLeft, adjustedRight } = alignHeight(leftText, rightText);
+
     const normalizedLeft = normalizeText(leftText);
     const normalizedRight = normalizeText(rightText);
 
     if (normalizedLeft === normalizedRight) {
       resultDiv.innerHTML = '<div style="text-align:center; color:var(--success); font-weight:600;">✅ 文本内容相同（忽略标点和格式）</div>';
-      highlightSameText(leftDiv, leftText);
-      highlightSameText(rightDiv, rightText);
+      highlightSameText(leftDiv, adjustedLeft);
+      highlightSameText(rightDiv, adjustedRight);
     } else {
       resultDiv.innerHTML = '<div style="text-align:center; color:var(--danger); font-weight:600;">❌ 文本内容不同</div>';
-      highlightDifferentText(leftDiv, rightDiv, leftText, rightText);
+      highlightDifferentText(leftDiv, rightDiv, adjustedLeft, adjustedRight);
     }
+  }
+
+  function alignHeight(leftText, rightText) {
+    const leftLines = leftText.split('\n').length;
+    const rightLines = rightText.split('\n').length;
+    
+    if (leftLines === rightLines) {
+      return { adjustedLeft: leftText, adjustedRight: rightText };
+    }
+    
+    let adjustedLeft = leftText;
+    let adjustedRight = rightText;
+    
+    if (leftLines < rightLines) {
+      // 左侧短，添加空行
+      const diff = rightLines - leftLines;
+      adjustedLeft += '\n'.repeat(diff);
+    } else {
+      // 右侧短，添加空行
+      const diff = leftLines - rightLines;
+      adjustedRight += '\n'.repeat(diff);
+    }
+    
+    return { adjustedLeft, adjustedRight };
   }
 
   function highlightSameText(element, text) {
