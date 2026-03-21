@@ -41,6 +41,27 @@
       color: #fff;
       box-shadow: 0 4px 20px rgba(108,92,231,0.25);
     }
+    .header-tabs {
+      display: flex; gap: 4px;
+    }
+    .tab {
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.15);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .tab:hover {
+      background: rgba(255,255,255,0.25);
+      transform: translateY(-1px);
+    }
+    .tab.active {
+      background: rgba(255,255,255,0.35);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
     .header-left { display: flex; align-items: center; gap: 12px; }
     .header-logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
     .header-badges { display: flex; gap: 6px; }
@@ -59,6 +80,13 @@
       padding: 14px 20px;
       min-height: calc(100vh - 64px);
       max-height: calc(100vh - 64px);
+    }
+    .page {
+      display: none;
+      grid-column: 1 / -1;
+    }
+    .page.active {
+      display: contents;
     }
     .left-col { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
     .right-col { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
@@ -284,164 +312,228 @@
       <span class="header-badge">24kHz WAV</span>
     </div>
   </div>
+  <div class="header-tabs">
+    <div class="tab active" data-tab="tts" onclick="switchTab('tts')">🎵 TTS</div>
+    <div class="tab" data-tab="compare" onclick="switchTab('compare')">🔄 文本对比</div>
+  </div>
 </div>
 
 <!-- ══════════ Main Layout ══════════ -->
 <div class="main-layout">
 
-  <!-- ── Left Column ── -->
-  <div class="left-col">
+  <!-- TTS Page -->
+  <div id="ttsPage" class="page active">
+    <!-- ── Left Column ── -->
+    <div class="left-col">
 
-    <!-- Result & History -->
-    <div class="result-history-area">
-      <div class="result-section" id="resultSection">
-        <div class="card-title"><span class="icon">🎧</span> 生成结果</div>
-        <div id="resultEmpty" class="result-empty">生成的语音将在这里播放</div>
-        <div id="resultContent" style="display:none;">
-          <audio id="audioPlayer" class="audio-player" controls></audio>
-          <div class="result-actions">
-            <button class="btn btn-outline btn-sm" onclick="playAgain()">🔄 重播</button>
-            <button class="btn btn-sm" onclick="download()">⬇️ 下载</button>
+      <!-- Result & History -->
+      <div class="result-history-area">
+        <div class="result-section" id="resultSection">
+          <div class="card-title"><span class="icon">🎧</span> 生成结果</div>
+          <div id="resultEmpty" class="result-empty">生成的语音将在这里播放</div>
+          <div id="resultContent" style="display:none;">
+            <audio id="audioPlayer" class="audio-player" controls></audio>
+            <div class="result-actions">
+              <button class="btn btn-outline btn-sm" onclick="playAgain()">🔄 重播</button>
+              <button class="btn btn-sm" onclick="download()">⬇️ 下载</button>
+            </div>
+            <div class="meta-info">
+              <span id="metaSize"></span>
+              <span id="metaTime"></span>
+              <span id="metaVoice"></span>
+            </div>
           </div>
-          <div class="meta-info">
-            <span id="metaSize"></span>
-            <span id="metaTime"></span>
-            <span id="metaVoice"></span>
+          <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p id="loadingText">正在生成语音，请稍候…</p>
+          </div>
+          <div class="error" id="errorMsg"></div>
+        </div>
+
+        <div class="history-section">
+          <div class="card-title collapsible" onclick="toggleCollapse(this)">
+            <span class="icon">📜</span> 历史记录 <span style="font-size:0.76rem; color:var(--muted); font-weight:400; margin-left:4px;" id="historyCount">(0)</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="collapsible-body">
+            <div class="history-list" id="historyList">
+              <div class="history-empty">暂无历史记录</div>
+            </div>
+            <div class="history-clear-btn" id="clearHistoryBtn" style="display:none;">
+              <button class="btn btn-outline btn-sm" onclick="clearHistory()">🗑️ 清空</button>
+            </div>
           </div>
         </div>
-        <div class="loading" id="loading">
-          <div class="spinner"></div>
-          <p id="loadingText">正在生成语音，请稍候…</p>
-        </div>
-        <div class="error" id="errorMsg"></div>
       </div>
 
-      <div class="history-section">
-        <div class="card-title collapsible" onclick="toggleCollapse(this)">
-          <span class="icon">📜</span> 历史记录 <span style="font-size:0.76rem; color:var(--muted); font-weight:400; margin-left:4px;" id="historyCount">(0)</span>
-          <span class="chevron">▼</span>
-        </div>
-        <div class="collapsible-body">
-          <div class="history-list" id="historyList">
-            <div class="history-empty">暂无历史记录</div>
+      <!-- Text Input -->
+      <div class="text-area-card">
+        <div class="card" style="flex:1; display:flex; flex-direction:column;">
+          <div class="card-title"><span class="icon">📝</span> 输入文本</div>
+          <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…" style="flex:1; min-height:100px;"></textarea>
+          <div class="char-count"><span id="charCount">0</span> / 10000</div>
+          <div class="generate-bar">
+            <button class="btn btn-full" id="generateBtn" onclick="generate()">
+              🎵 生成语音 <span style="font-size:0.76rem; font-weight:400; opacity:0.8;">Ctrl+Enter</span>
+            </button>
+            <button class="btn btn-outline" id="undoBtn" onclick="undoText()" title="撤销" style="white-space:nowrap; padding:12px 14px;">↩️</button>
+            <button class="btn btn-outline" id="redoBtn" onclick="redoText()" title="恢复" style="white-space:nowrap; padding:12px 14px;">↪️</button>
           </div>
-          <div class="history-clear-btn" id="clearHistoryBtn" style="display:none;">
-            <button class="btn btn-outline btn-sm" onclick="clearHistory()">🗑️ 清空</button>
-          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Text Input -->
-    <div class="text-area-card">
-      <div class="card" style="flex:1; display:flex; flex-direction:column;">
-        <div class="card-title"><span class="icon">📝</span> 输入文本</div>
-        <textarea id="textInput" placeholder="在这里输入你想转换为语音的文字…" style="flex:1; min-height:100px;"></textarea>
-        <div class="char-count"><span id="charCount">0</span> / 10000</div>
-        <div class="generate-bar">
-          <button class="btn btn-full" id="generateBtn" onclick="generate()">
-            🎵 生成语音 <span style="font-size:0.76rem; font-weight:400; opacity:0.8;">Ctrl+Enter</span>
-          </button>
-          <button class="btn btn-outline" id="undoBtn" onclick="undoText()" title="撤销" style="white-space:nowrap; padding:12px 14px;">↩️</button>
-          <button class="btn btn-outline" id="redoBtn" onclick="redoText()" title="恢复" style="white-space:nowrap; padding:12px 14px;">↪️</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Proofread Card -->
-    <div class="card" id="proofreadCard">
-      <div class="card-title"><span class="icon">🔍</span> 文本校验</div>
-      <button class="btn btn-outline btn-full" id="proofreadBtn" onclick="proofread()" style="margin-bottom:10px;">
-        🔍 检查不通顺 &amp; 多音字
-      </button>
-      <div id="proofreadLoading" style="display:none; text-align:center; padding:12px;">
-        <div class="spinner" style="width:20px; height:20px; border-width:2px;"></div>
-        <p style="color:var(--muted); font-size:0.78rem; margin-top:4px;">正在校验中…</p>
-      </div>
-      <div id="proofreadResult" style="display:none;"></div>
-      <div id="proofreadError" class="error"></div>
-    </div>
-
-  </div>
-
-  <!-- ── Right Column: Settings ── -->
-  <div class="right-col">
-
-    <!-- API Key -->
-    <div class="card">
-      <div class="card-title"><span class="icon">🔑</span> API Key</div>
-      <div class="api-key-row">
-        <input type="password" id="apiKeyInput" placeholder="输入 MiMo API Key" autocomplete="off" />
-        <button class="btn btn-outline btn-sm" onclick="toggleKeyVisibility()" style="padding:8px 10px;">
-          <span id="keyEyeIcon">👁️</span>
+      <!-- Proofread Card -->
+      <div class="card" id="proofreadCard">
+        <div class="card-title"><span class="icon">🔍</span> 文本校验</div>
+        <button class="btn btn-outline btn-full" id="proofreadBtn" onclick="proofread()" style="margin-bottom:10px;">
+          🔍 检查不通顺 &amp; 多音字
         </button>
-        <button class="btn btn-sm" onclick="saveApiKey()" style="white-space:nowrap;">保存</button>
+        <div id="proofreadLoading" style="display:none; text-align:center; padding:12px;">
+          <div class="spinner" style="width:20px; height:20px; border-width:2px;"></div>
+          <p style="color:var(--muted); font-size:0.78rem; margin-top:4px;">正在校验中…</p>
+        </div>
+        <div id="proofreadResult" style="display:none;"></div>
+        <div id="proofreadError" class="error"></div>
       </div>
-      <div class="api-key-status" id="apiKeyStatus">API Key 随请求发送到后端调用 API</div>
+
     </div>
 
-    <!-- Voice & Style -->
-    <div class="card">
-      <div class="card-title"><span class="icon">🎨</span> 音色与语气</div>
+    <!-- ── Right Column: Settings ── -->
+    <div class="right-col">
 
-      <!-- Voice -->
-      <span class="section-label">🔊 音色</span>
-      <div class="chip-group" id="voiceChips">
-        <div class="chip active" data-value="mimo_default">默认</div>
-        <div class="chip" data-value="default_zh">中文</div>
-        <div class="chip" data-value="default_en">英文</div>
+      <!-- API Key -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🔑</span> API Key</div>
+        <div class="api-key-row">
+          <input type="password" id="apiKeyInput" placeholder="输入 MiMo API Key" autocomplete="off" />
+          <button class="btn btn-outline btn-sm" onclick="toggleKeyVisibility()" style="padding:8px 10px;">
+            <span id="keyEyeIcon">👁️</span>
+          </button>
+          <button class="btn btn-sm" onclick="saveApiKey()" style="white-space:nowrap;">保存</button>
+        </div>
+        <div class="api-key-status" id="apiKeyStatus">API Key 随请求发送到后端调用 API</div>
       </div>
 
-      <!-- Emotion -->
-      <span class="section-label">😊 情感</span>
-      <div class="chip-group" id="emotionChips">
-        <div class="chip active" data-value="">默认</div>
-        <div class="chip" data-value="开心">😊 开心</div>
-        <div class="chip" data-value="悲伤">😢 悲伤</div>
-        <div class="chip" data-value="生气">😠 生气</div>
-        <div class="chip" data-value="平静">😌 平静</div>
-        <div class="chip" data-value="深情款款">💕 深情</div>
-        <div class="chip" data-value="慵懒 刚睡醒">😴 慵懒</div>
-        <div class="chip" data-value="撒娇 夹子音">🥰 撒娇</div>
+      <!-- Voice & Style -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🎨</span> 音色与语气</div>
+
+        <!-- Voice -->
+        <span class="section-label">🔊 音色</span>
+        <div class="chip-group" id="voiceChips">
+          <div class="chip active" data-value="mimo_default">默认</div>
+          <div class="chip" data-value="default_zh">中文</div>
+          <div class="chip" data-value="default_en">英文</div>
+        </div>
+
+        <!-- Emotion -->
+        <span class="section-label">😊 情感</span>
+        <div class="chip-group" id="emotionChips">
+          <div class="chip active" data-value="">默认</div>
+          <div class="chip" data-value="开心">😊 开心</div>
+          <div class="chip" data-value="悲伤">😢 悲伤</div>
+          <div class="chip" data-value="生气">😠 生气</div>
+          <div class="chip" data-value="平静">😌 平静</div>
+          <div class="chip" data-value="深情款款">💕 深情</div>
+          <div class="chip" data-value="慵懒 刚睡醒">😴 慵懒</div>
+          <div class="chip" data-value="撒娇 夹子音">🥰 撒娇</div>
+        </div>
+
+        <!-- Custom requirements -->
+        <span class="section-label">✏️ 自定义要求（与上方选项融合）</span>
+        <input type="text" id="customStyle" placeholder="如：标准广播腔，抑扬顿挫，断句增加500ms" />
       </div>
 
-      <!-- Custom requirements -->
-      <span class="section-label">✏️ 自定义要求（与上方选项融合）</span>
-      <input type="text" id="customStyle" placeholder="如：标准广播腔，抑扬顿挫，断句增加500ms" />
+      <!-- Parameters -->
+      <div class="card">
+        <div class="card-title collapsible open" onclick="toggleCollapse(this)">
+          <span class="icon">⚙️</span> 参数调节 <span class="chevron">▼</span>
+        </div>
+        <div class="collapsible-body open">
+
+        <!-- Speed -->
+        <div class="slider-row">
+          <label>语速</label>
+          <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSliderVal('speedVal', this.value, 'x')" />
+          <span class="slider-val" id="speedVal">1.0x</span>
+        </div>
+
+        <!-- Volume -->
+        <div class="slider-row">
+          <label>音量</label>
+          <input type="range" id="volumeSlider" min="0" max="200" step="5" value="100" oninput="updateSliderVal('volumeVal', this.value, '%')" />
+          <span class="slider-val" id="volumeVal">100%</span>
+        </div>
+
+        <!-- Pitch -->
+        <div class="slider-row">
+          <label>音高</label>
+          <input type="range" id="pitchSlider" min="-12" max="12" step="1" value="0" oninput="updateSliderVal('pitchVal', this.value, '')" />
+          <span class="slider-val" id="pitchVal">0</span>
+        </div>
+
+        </div>
+      </div>
+
     </div>
-
-    <!-- Parameters -->
-    <div class="card">
-      <div class="card-title collapsible open" onclick="toggleCollapse(this)">
-        <span class="icon">⚙️</span> 参数调节 <span class="chevron">▼</span>
-      </div>
-      <div class="collapsible-body open">
-
-      <!-- Speed -->
-      <div class="slider-row">
-        <label>语速</label>
-        <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSliderVal('speedVal', this.value, 'x')" />
-        <span class="slider-val" id="speedVal">1.0x</span>
-      </div>
-
-      <!-- Volume -->
-      <div class="slider-row">
-        <label>音量</label>
-        <input type="range" id="volumeSlider" min="0" max="200" step="5" value="100" oninput="updateSliderVal('volumeVal', this.value, '%')" />
-        <span class="slider-val" id="volumeVal">100%</span>
-      </div>
-
-      <!-- Pitch -->
-      <div class="slider-row">
-        <label>音高</label>
-        <input type="range" id="pitchSlider" min="-12" max="12" step="1" value="0" oninput="updateSliderVal('pitchVal', this.value, '')" />
-        <span class="slider-val" id="pitchVal">0</span>
-      </div>
-
-      </div>
-    </div>
-
   </div>
+
+  <!-- Text Comparison Page -->
+  <div id="comparePage" class="page">
+    <!-- ── Left Column ── -->
+    <div class="left-col">
+
+      <!-- Text Comparison Area -->
+      <div class="card" style="flex:1; display:flex; flex-direction:column;">
+        <div class="card-title"><span class="icon">🔄</span> 文本对比</div>
+        
+        <!-- Text Inputs -->
+        <div style="display:flex; gap:12px; flex:1;">
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <label style="font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:6px;">左侧文本</label>
+            <textarea id="compareTextLeft" placeholder="输入左侧文本…" style="flex:1; min-height:200px;"></textarea>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <label style="font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:6px;">右侧文本</label>
+            <textarea id="compareTextRight" placeholder="输入右侧文本…" style="flex:1; min-height:200px;"></textarea>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <button class="btn btn-full" onclick="compareTexts()">🔍 开始对比</button>
+          <button class="btn btn-outline" onclick="clearCompare()">🗑️ 清空</button>
+        </div>
+      </div>
+
+      <!-- Comparison Result -->
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span> 对比结果</div>
+        <div id="compareResult" style="min-height:100px; padding:12px; font-size:0.9rem; line-height:1.6; background:var(--bg); border-radius:var(--radius-sm);"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Right Column ── -->
+    <div class="right-col">
+      <div class="card">
+        <div class="card-title"><span class="icon">💡</span> 使用说明</div>
+        <div style="font-size:0.85rem; line-height:1.6; color:var(--text);">
+          <p style="margin-bottom:8px;"><strong>功能说明：</strong></p>
+          <ul style="margin:0; padding-left:18px; margin-bottom:12px;">
+            <li>支持跨行文本对比</li>
+            <li>自动忽略标点符号和空白字符</li>
+            <li>相同文本用<span style="background:#d4edda; color:#155724; padding:2px 6px; border-radius:4px;">绿色</span>标注</li>
+            <li>不同文本用<span style="background:#fff3cd; color:#856404; padding:2px 6px; border-radius:4px;">黄色</span>标注</li>
+          </ul>
+          <p style="margin-bottom:8px;"><strong>使用示例：</strong></p>
+          <p style="margin-bottom:4px;">左侧：带标点的整段文字</p>
+          <p>右侧：不带标点的换行文字</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -456,7 +548,145 @@
     initChips();
     renderHistory();
     loadApiKey();
+    initCompareEventListeners();
   });
+
+  // ── Tab Switching ──
+  function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.classList.remove('active');
+      if (tab.dataset.tab === tabName) {
+        tab.classList.add('active');
+      }
+    });
+
+    // Update pages
+    document.querySelectorAll('.page').forEach(page => {
+      page.classList.remove('active');
+    });
+    document.getElementById(tabName + 'Page').classList.add('active');
+  }
+
+  // ── Text Comparison ──
+  function initCompareEventListeners() {
+    const leftTextarea = document.getElementById('compareTextLeft');
+    const rightTextarea = document.getElementById('compareTextRight');
+    
+    leftTextarea.addEventListener('input', debounce(compareTexts, 500));
+    rightTextarea.addEventListener('input', debounce(compareTexts, 500));
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  function normalizeText(text) {
+    if (!text) return '';
+    // Remove punctuation, whitespace, newlines, tabs
+    return text.replace(/[。！？!?；;…，,：:（）()【】[\]《》<>""]/g, '')
+              .replace(/\s+/g, '')
+              .replace(/\n/g, '')
+              .replace(/\t/g, '')
+              .trim();
+  }
+
+  function compareTexts() {
+    const leftText = document.getElementById('compareTextLeft').value;
+    const rightText = document.getElementById('compareTextRight').value;
+    const resultDiv = document.getElementById('compareResult');
+
+    if (!leftText || !rightText) {
+      resultDiv.innerHTML = '<div style="text-align:center; color:var(--muted);">请输入文本进行对比</div>';
+      return;
+    }
+
+    const normalizedLeft = normalizeText(leftText);
+    const normalizedRight = normalizeText(rightText);
+
+    if (normalizedLeft === normalizedRight) {
+      resultDiv.innerHTML = '<div style="text-align:center; color:var(--success); font-weight:600;">✅ 文本内容相同（忽略标点和格式）</div>';
+      renderColoredComparison(leftText, rightText, true);
+    } else {
+      resultDiv.innerHTML = '<div style="text-align:center; color:var(--danger); font-weight:600;">❌ 文本内容不同</div>';
+      renderColoredComparison(leftText, rightText, false);
+    }
+  }
+
+  function renderColoredComparison(leftText, rightText, isSame) {
+    const leftDiv = document.createElement('div');
+    const rightDiv = document.createElement('div');
+    
+    leftDiv.style.cssText = 'margin-bottom: 12px; padding: 12px; border-radius: var(--radius-sm);';
+    rightDiv.style.cssText = 'padding: 12px; border-radius: var(--radius-sm);';
+    
+    if (isSame) {
+      leftDiv.style.background = '#d4edda';
+      leftDiv.style.color = '#155724';
+      rightDiv.style.background = '#d4edda';
+      rightDiv.style.color = '#155724';
+      leftDiv.innerHTML = `<strong>左侧文本：</strong><br>${renderHighlightedText(leftText, true)}`;
+      rightDiv.innerHTML = `<strong>右侧文本：</strong><br>${renderHighlightedText(rightText, true)}`;
+    } else {
+      leftDiv.style.background = '#fff3cd';
+      leftDiv.style.color = '#856404';
+      rightDiv.style.background = '#fff3cd';
+      rightDiv.style.color = '#856404';
+      // 使用字符级对比
+      const { leftHighlighted, rightHighlighted } = compareChars(leftText, rightText);
+      leftDiv.innerHTML = `<strong>左侧文本：</strong><br>${leftHighlighted}`;
+      rightDiv.innerHTML = `<strong>右侧文本：</strong><br>${rightHighlighted}`;
+    }
+    
+    const resultDiv = document.getElementById('compareResult');
+    resultDiv.innerHTML = '';
+    resultDiv.appendChild(leftDiv);
+    resultDiv.appendChild(rightDiv);
+  }
+
+  function renderHighlightedText(text, isSame) {
+    const color = isSame ? '#155724' : '#856404';
+    return `<span style="color: ${color};">${escHtml(text)}</span>`;
+  }
+
+  function compareChars(leftText, rightText) {
+    const leftChars = leftText.split('');
+    const rightChars = rightText.split('');
+    
+    let leftResult = '';
+    let rightResult = '';
+    
+    const maxLength = Math.max(leftChars.length, rightChars.length);
+    
+    for (let i = 0; i < maxLength; i++) {
+      const leftChar = leftChars[i] || '';
+      const rightChar = rightChars[i] || '';
+      
+      if (leftChar === rightChar) {
+        leftResult += `<span style="color: #155724; font-weight: 600;">${escHtml(leftChar)}</span>`;
+        rightResult += `<span style="color: #155724; font-weight: 600;">${escHtml(rightChar)}</span>`;
+      } else {
+        leftResult += `<span style="color: #856404; font-weight: 600; background: #fff3cd;">${escHtml(leftChar)}</span>`;
+        rightResult += `<span style="color: #856404; font-weight: 600; background: #fff3cd;">${escHtml(rightChar)}</span>`;
+      }
+    }
+    
+    return { leftHighlighted: leftResult, rightHighlighted: rightResult };
+  }
+
+  function clearCompare() {
+    document.getElementById('compareTextLeft').value = '';
+    document.getElementById('compareTextRight').value = '';
+    document.getElementById('compareResult').innerHTML = '<div style="text-align:center; color:var(--muted);">请输入文本进行对比</div>';
+  }
 
   // ── Collapsible ──
   function toggleCollapse(el) {
