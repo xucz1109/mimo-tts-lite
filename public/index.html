@@ -549,8 +549,6 @@
     renderHistory();
     loadApiKey();
     initCompareEventListeners();
-    // 初始化视觉高度
-    setTimeout(adjustVisualHeight, 100);
   });
 
   // ── Tab Switching ──
@@ -575,10 +573,7 @@
     const leftDiv = document.getElementById('compareTextLeft');
     const rightDiv = document.getElementById('compareTextRight');
     
-    const debouncedCompare = debounce(() => {
-      compareTexts();
-      adjustVisualHeight();
-    }, 500);
+    const debouncedCompare = debounce(compareTexts, 500);
     
     leftDiv.addEventListener('input', debouncedCompare);
     rightDiv.addEventListener('input', debouncedCompare);
@@ -623,63 +618,17 @@
       return;
     }
 
-    // 调整高度对齐 - 直接更新文本框内容
-    const { adjustedLeft, adjustedRight } = alignHeight(leftText, rightText);
-    
-    // 直接更新文本框内容
-    leftDiv.innerHTML = adjustedLeft;
-    rightDiv.innerHTML = adjustedRight;
-
     const normalizedLeft = normalizeText(leftText);
     const normalizedRight = normalizeText(rightText);
 
     if (normalizedLeft === normalizedRight) {
       resultDiv.innerHTML = '<div style="text-align:center; color:var(--success); font-weight:600;">✅ 文本内容相同（忽略标点和格式）</div>';
-      highlightSameText(leftDiv, adjustedLeft);
-      highlightSameText(rightDiv, adjustedRight);
+      highlightSameText(leftDiv, leftText);
+      highlightSameText(rightDiv, rightText);
     } else {
       resultDiv.innerHTML = '<div style="text-align:center; color:var(--danger); font-weight:600;">❌ 文本内容不同</div>';
-      highlightDifferentText(leftDiv, rightDiv, adjustedLeft, adjustedRight);
+      highlightDifferentText(leftDiv, rightDiv, leftText, rightText);
     }
-    
-    // 调整视觉高度
-    setTimeout(adjustVisualHeight, 100);
-  }
-
-  function alignHeight(leftText, rightText) {
-    const leftLines = leftText.split('\n').length;
-    const rightLines = rightText.split('\n').length;
-    
-    let adjustedLeft = leftText;
-    let adjustedRight = rightText;
-    
-    if (leftLines < rightLines) {
-      // 左侧短，添加换行
-      const diff = rightLines - leftLines;
-      adjustedLeft = leftText + '\n'.repeat(diff);
-    } else if (rightLines < leftLines) {
-      // 右侧短，添加换行
-      const diff = leftLines - rightLines;
-      adjustedRight = rightText + '\n'.repeat(diff);
-    }
-    
-    return { adjustedLeft, adjustedRight };
-  }
-
-  function adjustVisualHeight() {
-    const leftDiv = document.getElementById('compareTextLeft');
-    const rightDiv = document.getElementById('compareTextRight');
-    
-    if (!leftDiv || !rightDiv) return;
-    
-    const leftHeight = leftDiv.scrollHeight;
-    const rightHeight = rightDiv.scrollHeight;
-    
-    // 设置最小高度，确保左右一致
-    const maxHeight = Math.max(leftHeight, rightHeight);
-    
-    leftDiv.style.minHeight = `${maxHeight}px`;
-    rightDiv.style.minHeight = `${maxHeight}px`;
   }
 
   function highlightSameText(element, text) {
@@ -759,9 +708,6 @@
     document.getElementById('compareTextLeft').innerHTML = '';
     document.getElementById('compareTextRight').innerHTML = '';
     document.getElementById('compareResult').innerHTML = '<div style="text-align:center; color:var(--muted);">请输入文本进行对比</div>';
-    // 重置高度
-    document.getElementById('compareTextLeft').style.minHeight = '';
-    document.getElementById('compareTextRight').style.minHeight = '';
   }
 
   // ── Collapsible ──
