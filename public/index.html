@@ -89,7 +89,7 @@
       display: contents;
     }
     .left-col { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
-    .right-col { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
+    .right-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 
     /* ── Card ── */
     .card {
@@ -510,12 +510,6 @@
         </div>
       </div>
 
-      <!-- Comparison Result -->
-      <div class="card">
-        <div class="card-title"><span class="icon">📊</span> 对比结果</div>
-        <div id="compareResult" style="min-height:100px; padding:12px; font-size:0.9rem; line-height:1.6; background:var(--bg); border-radius:var(--radius-sm);"></div>
-      </div>
-
     </div>
 
     <!-- ── Right Column ── -->
@@ -610,10 +604,8 @@
     
     const leftText = leftDiv.innerText || '';
     const rightText = rightDiv.innerText || '';
-    const resultDiv = document.getElementById('compareResult');
 
     if (!leftText || !rightText) {
-      resultDiv.innerHTML = '<div style="text-align:center; color:var(--muted);">请输入文本进行对比</div>';
       return;
     }
 
@@ -621,11 +613,9 @@
     const normalizedRight = normalizeText(rightText);
 
     if (normalizedLeft === normalizedRight) {
-      resultDiv.innerHTML = '<div style="text-align:center; color:var(--success); font-weight:600;">✅ 文本内容相同（忽略标点和格式）</div>';
       highlightSameText(leftDiv, leftText);
       highlightSameText(rightDiv, rightText);
     } else {
-      resultDiv.innerHTML = '<div style="text-align:center; color:var(--danger); font-weight:600;">❌ 文本内容不同</div>';
       highlightDifferentText(leftDiv, rightDiv, leftText, rightText);
     }
   }
@@ -706,7 +696,6 @@
   function clearCompare() {
     document.getElementById('compareTextLeft').innerHTML = '';
     document.getElementById('compareTextRight').innerHTML = '';
-    document.getElementById('compareResult').innerHTML = '<div style="text-align:center; color:var(--muted);">请输入文本进行对比</div>';
   }
 
   // ── Collapsible ──
