@@ -623,8 +623,12 @@
       return;
     }
 
-    // 调整高度对齐
+    // 调整高度对齐 - 直接更新文本框内容
     const { adjustedLeft, adjustedRight } = alignHeight(leftText, rightText);
+    
+    // 直接更新文本框内容
+    leftDiv.innerHTML = adjustedLeft;
+    rightDiv.innerHTML = adjustedRight;
 
     const normalizedLeft = normalizeText(leftText);
     const normalizedRight = normalizeText(rightText);
@@ -650,53 +654,16 @@
     let adjustedRight = rightText;
     
     if (leftLines < rightLines) {
-      // 左侧短，在标点符号后添加换行
-      adjustedLeft = addLineBreaks(leftText, rightLines - leftLines);
+      // 左侧短，添加换行
+      const diff = rightLines - leftLines;
+      adjustedLeft = leftText + '\n'.repeat(diff);
     } else if (rightLines < leftLines) {
-      // 右侧短，在标点符号后添加换行
-      adjustedRight = addLineBreaks(rightText, leftLines - rightLines);
+      // 右侧短，添加换行
+      const diff = leftLines - rightLines;
+      adjustedRight = rightText + '\n'.repeat(diff);
     }
     
     return { adjustedLeft, adjustedRight };
-  }
-
-  function addLineBreaks(text, additionalLines) {
-    if (additionalLines <= 0) return text;
-    
-    const punctuation = /[。！？!?；;…，,：:]/g;
-    let result = text;
-    let breaksAdded = 0;
-    let lastIndex = 0;
-    
-    // 查找所有标点符号位置
-    let match;
-    const punctuationPositions = [];
-    
-    while ((match = punctuation.exec(text)) !== null) {
-      punctuationPositions.push(match.index);
-    }
-    
-    // 从后往前插入换行，避免索引偏移
-    const insertPositions = [];
-    const step = Math.max(1, Math.floor(punctuationPositions.length / (additionalLines + 1)));
-    
-    for (let i = punctuationPositions.length - 1; i >= 0 && breaksAdded < additionalLines; i -= step) {
-      insertPositions.push(punctuationPositions[i] + 1);
-      breaksAdded++;
-    }
-    
-    // 按位置从后往前插入换行
-    insertPositions.sort((a, b) => b - a);
-    insertPositions.forEach(pos => {
-      result = result.substring(0, pos) + '\n' + result.substring(pos);
-    });
-    
-    // 如果还不够，在末尾添加剩余的换行
-    if (breaksAdded < additionalLines) {
-      result += '\n'.repeat(additionalLines - breaksAdded);
-    }
-    
-    return result;
   }
 
   function adjustVisualHeight() {
