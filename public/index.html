@@ -549,6 +549,8 @@
     renderHistory();
     loadApiKey();
     initCompareEventListeners();
+    // 初始化视觉高度
+    setTimeout(adjustVisualHeight, 100);
   });
 
   // ── Tab Switching ──
@@ -570,11 +572,20 @@
 
   // ── Text Comparison ──
   function initCompareEventListeners() {
-    const leftTextarea = document.getElementById('compareTextLeft');
-    const rightTextarea = document.getElementById('compareTextRight');
+    const leftDiv = document.getElementById('compareTextLeft');
+    const rightDiv = document.getElementById('compareTextRight');
     
-    leftTextarea.addEventListener('input', debounce(compareTexts, 500));
-    rightTextarea.addEventListener('input', debounce(compareTexts, 500));
+    const debouncedCompare = debounce(() => {
+      compareTexts();
+      adjustVisualHeight();
+    }, 500);
+    
+    leftDiv.addEventListener('input', debouncedCompare);
+    rightDiv.addEventListener('input', debouncedCompare);
+    leftDiv.addEventListener('paste', debouncedCompare);
+    rightDiv.addEventListener('paste', debouncedCompare);
+    leftDiv.addEventListener('keyup', debouncedCompare);
+    rightDiv.addEventListener('keyup', debouncedCompare);
   }
 
   function debounce(func, wait) {
@@ -626,30 +637,44 @@
       resultDiv.innerHTML = '<div style="text-align:center; color:var(--danger); font-weight:600;">❌ 文本内容不同</div>';
       highlightDifferentText(leftDiv, rightDiv, adjustedLeft, adjustedRight);
     }
+    
+    // 调整视觉高度
+    setTimeout(adjustVisualHeight, 100);
   }
 
   function alignHeight(leftText, rightText) {
+    // 首先按行数对齐作为基础
     const leftLines = leftText.split('\n').length;
     const rightLines = rightText.split('\n').length;
-    
-    if (leftLines === rightLines) {
-      return { adjustedLeft: leftText, adjustedRight: rightText };
-    }
     
     let adjustedLeft = leftText;
     let adjustedRight = rightText;
     
     if (leftLines < rightLines) {
-      // 左侧短，添加空行
       const diff = rightLines - leftLines;
       adjustedLeft += '\n'.repeat(diff);
-    } else {
-      // 右侧短，添加空行
+    } else if (rightLines < leftLines) {
       const diff = leftLines - rightLines;
       adjustedRight += '\n'.repeat(diff);
     }
     
     return { adjustedLeft, adjustedRight };
+  }
+
+  function adjustVisualHeight() {
+    const leftDiv = document.getElementById('compareTextLeft');
+    const rightDiv = document.getElementById('compareTextRight');
+    
+    if (!leftDiv || !rightDiv) return;
+    
+    const leftHeight = leftDiv.scrollHeight;
+    const rightHeight = rightDiv.scrollHeight;
+    
+    // 设置最小高度，确保左右一致
+    const maxHeight = Math.max(leftHeight, rightHeight);
+    
+    leftDiv.style.minHeight = `${maxHeight}px`;
+    rightDiv.style.minHeight = `${maxHeight}px`;
   }
 
   function highlightSameText(element, text) {
@@ -729,6 +754,9 @@
     document.getElementById('compareTextLeft').innerHTML = '';
     document.getElementById('compareTextRight').innerHTML = '';
     document.getElementById('compareResult').innerHTML = '<div style="text-align:center; color:var(--muted);">请输入文本进行对比</div>';
+    // 重置高度
+    document.getElementById('compareTextLeft').style.minHeight = '';
+    document.getElementById('compareTextRight').style.minHeight = '';
   }
 
   // ── Collapsible ──
