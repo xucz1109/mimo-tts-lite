@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>文本对比工具</title>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --surface: #ffffff;
+      --card: #ffffff;
+      --border: #e2e5f1;
+      --text: #1a1a2e;
+      --muted: #7b7f9e;
+      --accent: #6c5ce7;
+      --accent2: #a29bfe;
+      --accent-hover: #5a4bd1;
+      --accent-glow: rgba(108,92,231,0.12);
+      --accent-light: #ede9fc;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #74b9ff 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(108,92,231,0.25);
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .header p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 16px;
+      max-width: 1400px; margin: 0 auto;
+      padding: 16px 20px;
+      min-height: calc(100vh - 100px);
+    }
+
+    .left-col {
+      display: flex; flex-direction: column; gap: 12px;
+      overflow-y: auto;
+    }
+
+    .right-col {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+    }
+
+    .sticky-card {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+    }
+
+    .card-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px; color: var(--text);
+    }
+    .card-title .icon { font-size: 1.2rem; }
+
+    .text-inputs {
+      display: flex; gap: 16px; flex: 1;
+      min-height: 600px;
+    }
+    
+    .input-group {
+      flex: 1; display: flex; flex-direction: column;
+    }
+    
+    .input-group label {
+      font-size: 0.85rem; font-weight: 600; color: var(--muted);
+      margin-bottom: 8px;
+    }
+    
+    .text-area {
+      flex: 1; min-height: 500px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); font-size: 0.95rem; line-height: 1.7;
+      padding: 14px; font-family: inherit;
+      white-space: pre-wrap; word-wrap: break-word;
+      overflow-y: auto;
+    }
+    
+    .text-area:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+      background: var(--accent); color: #fff;
+      font-size: 0.8rem; font-weight: 600;
+      border: none; border-radius: var(--radius-sm); padding: 8px 12px;
+      cursor: pointer; transition: all 0.2s;
+      flex: 1;
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--accent-hover); box-shadow: 0 4px 16px rgba(108,92,231,0.3); transform: translateY(-1px); }
+    .btn:active { transform: scale(0.98); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: var(--accent-light); border-color: var(--accent); }
+
+    .actions {
+      display: flex; gap: 10px;
+      margin-top: 12px;
+    }
+
+    .instructions {
+      background: var(--accent-light); border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .instructions h3 {
+      font-size: 0.9rem; font-weight: 700; color: var(--text);
+      margin-bottom: 10px;
+    }
+    
+    .instructions ul {
+      margin: 0; padding-left: 18px;
+      font-size: 0.82rem; line-height: 1.6; color: var(--text);
+    }
+    
+    .instructions li {
+      margin-bottom: 6px;
+    }
+
+    .color-legend {
+      display: flex; gap: 12px; margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.78rem;
+    }
+    
+    .legend-color {
+      width: 14px; height: 14px; border-radius: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .right-col { order: -1; }
+      .sticky-card { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔄 文本对比工具</h1>
+    <p>纯前端实现的智能文本对比，无需安装任何软件</p>
+  </div>
+
+  <div class="main-layout">
+    <!-- ── Left Column ── -->
+    <div class="left-col">
+      <div class="card">
+        <div class="card-title">
+          <span class="icon">📝</span> 输入要对比的文本
+        </div>
+        
+        <div class="text-inputs">
+          <div class="input-group">
+            <label>左侧文本</label>
+            <div id="compareTextLeft" class="text-area" contenteditable="true" placeholder="输入左侧文本…"></div>
+          </div>
+          
+          <div class="input-group">
+            <label>右侧文本</label>
+            <div id="compareTextRight" class="text-area" contenteditable="true" placeholder="输入右侧文本…"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Right Column ── -->
+    <div class="right-col">
+      <div class="card sticky-card">
+        <div class="card-title">
+          <span class="icon">�</span> 使用说明
+        </div>
+        
+        <div class="instructions">
+          <ul>
+            <li>支持跨行文本对比</li>
+            <li>自动忽略标点符号和空白字符</li>
+            <li><span style="background:#d4edda; color:#155724; padding:2px 6px; border-radius:4px;">绿色</span>标注相同文本</li>
+            <li><span style="background:#f8d7da; color:#dc3545; padding:2px 6px; border-radius:4px;">红色</span>标注插入/删除的文本</li>
+          </ul>
+          <div class="color-legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: #d4edda;"></div>
+              <span>相同文本</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #f8d7da;"></div>
+              <span>插入/删除</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button class="btn" onclick="compareTexts()">🔍 开始对比</button>
+          <button class="btn btn-outline" onclick="removeEmptyLines()" title="去除空行">📝 去空行</button>
+          <button class="btn btn-outline" onclick="splitByLines()" title="每100行加空行">📄 拆分行</button>
+          <button class="btn btn-outline" onclick="clearCompare()">🗑️ 清空</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function normalizeText(text) {
+      if (!text) return '';
+      return text.replace(/[。！？!?；;…，,：:（）()【】[\]《》<>""]/g, '')
+                .replace(/\s+/g, '')
+                .replace(/\n/g, '')
+                .replace(/\t/g, '')
+                .trim();
+    }
+
+    function compareTexts() {
+      const leftDiv = document.getElementById('compareTextLeft');
+      const rightDiv = document.getElementById('compareTextRight');
+      
+      const leftText = leftDiv.innerText || '';
+      const rightText = rightDiv.innerText || '';
+
+      if (!leftText || !rightText) {
+        alert('请输入要对比的文本');
+        return;
+      }
+
+      const normalizedLeft = normalizeText(leftText);
+      const normalizedRight = normalizeText(rightText);
+
+      if (normalizedLeft === normalizedRight) {
+        highlightSameText(leftDiv, leftText);
+        highlightSameText(rightDiv, rightText);
+      } else {
+        highlightDifferentText(leftDiv, rightDiv, leftText, rightText);
+      }
+    }
+
+    function highlightSameText(element, text) {
+      element.innerHTML = text.split('').map(char => 
+        `<span style="color: #155724; font-weight: 600;">${escHtml(char)}</span>`
+      ).join('');
+    }
+
+    function highlightDifferentText(leftDiv, rightDiv, leftText, rightText) {
+      const { leftHighlighted, rightHighlighted } = smartCompare(leftText, rightText);
+      leftDiv.innerHTML = leftHighlighted;
+      rightDiv.innerHTML = rightHighlighted;
+    }
+
+    function smartCompare(leftText, rightText) {
+      const leftChars = leftText.split('');
+      const rightChars = rightText.split('');
+      
+      const leftLen = leftChars.length;
+      const rightLen = rightChars.length;
+      
+      const dp = Array(leftLen + 1).fill().map(() => Array(rightLen + 1).fill(0));
+      
+      for (let i = 0; i <= leftLen; i++) dp[i][0] = i;
+      for (let j = 0; j <= rightLen; j++) dp[0][j] = j;
+      
+      for (let i = 1; i <= leftLen; i++) {
+        for (let j = 1; j <= rightLen; j++) {
+          if (leftChars[i-1] === rightChars[j-1]) {
+            dp[i][j] = dp[i-1][j-1];
+          } else {
+            dp[i][j] = Math.min(
+              dp[i-1][j] + 1,
+              dp[i][j-1] + 1,
+              dp[i-1][j-1] + 1
+            );
+          }
+        }
+      }
+      
+      let i = leftLen;
+      let j = rightLen;
+      const leftResult = [];
+      const rightResult = [];
+      
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && leftChars[i-1] === rightChars[j-1]) {
+          leftResult.unshift(`<span style="color: #155724; font-weight: 600;">${escHtml(leftChars[i-1])}</span>`);
+          rightResult.unshift(`<span style="color: #155724; font-weight: 600;">${escHtml(rightChars[j-1])}</span>`);
+          i--;
+          j--;
+        } else if (i > 0 && (j === 0 || dp[i-1][j] <= dp[i][j-1])) {
+          leftResult.unshift(`<span style="color: #dc3545; font-weight: 600; background: #f8d7da;">${escHtml(leftChars[i-1])}</span>`);
+          rightResult.unshift('');
+          i--;
+        } else {
+          leftResult.unshift('');
+          rightResult.unshift(`<span style="color: #dc3545; font-weight: 600; background: #f8d7da;">${escHtml(rightChars[j-1])}</span>`);
+          j--;
+        }
+      }
+      
+      return {
+        leftHighlighted: leftResult.join(''),
+        rightHighlighted: rightResult.join('')
+      };
+    }
+
+    function clearCompare() {
+      document.getElementById('compareTextLeft').innerHTML = '';
+      document.getElementById('compareTextRight').innerHTML = '';
+    }
+
+    function removeEmptyLines() {
+      const leftDiv = document.getElementById('compareTextLeft');
+      const rightDiv = document.getElementById('compareTextRight');
+      
+      let leftText = leftDiv.innerText || '';
+      let rightText = rightDiv.innerText || '';
+      
+      // 去除所有空行（将连续的多个换行符替换为单个换行符）
+      const cleanedLeft = leftText.replace(/\n+/g, '\n').trim();
+      const cleanedRight = rightText.replace(/\n+/g, '\n').trim();
+      
+      // 使用innerHTML并保留换行符，确保复制到Word时换行不丢失
+      leftDiv.innerHTML = cleanedLeft.split('\n').map(line => 
+        line ? `${escHtml(line)}<br>` : '<br>'
+      ).join('');
+      
+      rightDiv.innerHTML = cleanedRight.split('\n').map(line => 
+        line ? `${escHtml(line)}<br>` : '<br>'
+      ).join('');
+      
+      // 更新高度
+      leftDiv.style.height = 'auto';
+      leftDiv.style.height = leftDiv.scrollHeight + 'px';
+      rightDiv.style.height = 'auto';
+      rightDiv.style.height = rightDiv.scrollHeight + 'px';
+    }
+
+    function splitByLines() {
+      const leftDiv = document.getElementById('compareTextLeft');
+      const rightDiv = document.getElementById('compareTextRight');
+      
+      let leftText = leftDiv.innerText || '';
+      let rightText = rightDiv.innerText || '';
+      
+      // 按换行符分割文本
+      const leftLines = leftText.split('\n');
+      const rightLines = rightText.split('\n');
+      
+      // 每100行添加一个空行
+      const splitLeft = [];
+      for (let i = 0; i < leftLines.length; i++) {
+        splitLeft.push(leftLines[i]);
+        if ((i + 1) % 100 === 0 && i !== leftLines.length - 1) {
+          splitLeft.push('');
+        }
+      }
+      
+      const splitRight = [];
+      for (let i = 0; i < rightLines.length; i++) {
+        splitRight.push(rightLines[i]);
+        if ((i + 1) % 100 === 0 && i !== rightLines.length - 1) {
+          splitRight.push('');
+        }
+      }
+      
+      // 使用innerHTML并保留换行符
+      leftDiv.innerHTML = splitLeft.map(line => 
+        line ? `${escHtml(line)}<br>` : '<br>'
+      ).join('');
+      
+      rightDiv.innerHTML = splitRight.map(line => 
+        line ? `${escHtml(line)}<br>` : '<br>'
+      ).join('');
+      
+      // 更新高度
+      leftDiv.style.height = 'auto';
+      leftDiv.style.height = leftDiv.scrollHeight + 'px';
+      rightDiv.style.height = 'auto';
+      rightDiv.style.height = rightDiv.scrollHeight + 'px';
+    }
+
+    function escHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const leftDiv = document.getElementById('compareTextLeft');
+      const rightDiv = document.getElementById('compareTextRight');
+      
+      leftDiv.addEventListener('input', () => {
+        leftDiv.style.height = 'auto';
+        leftDiv.style.height = leftDiv.scrollHeight + 'px';
+      });
+      
+      rightDiv.addEventListener('input', () => {
+        rightDiv.style.height = 'auto';
+        rightDiv.style.height = rightDiv.scrollHeight + 'px';
+      });
+    });
+  </script>
+</body>
+</html>
